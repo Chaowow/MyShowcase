@@ -5,72 +5,57 @@ function Header() {
   const isAuth = false;
 
   return (
-    <header className='bg-indigo-700 shadow-lg p-5'>
+    <header className='bg-indigo-950 shadow-lg p-5'>
         <div className='container mx-auto flex 
         justify-between items-center'>
            <div className=
-           'text-6xl font-bold font-mono text-center md:text-left'>
-            My Showcase
+           'text-6xl font-bold font-mono text-center md:text-left text-white'>
+              <Link to='/' className='hover:opacity-90'>
+                My Showcase
+              </Link>
             {/* Change font later */}
             </div>
+
         <div className='flex items-center space-x-4'>
           <nav>
-            <ul className='flex space-x-4'>
-              <li>
-                <Link 
-                to='/' 
-                className='text-gray-950 hover:text-stone-300'
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link 
-                to='/about' 
-                className='text-gray-950 hover:text-stone-300'
-                >
-                    About
-                </Link>
-              </li>
+            <ul className='flex space-x-8'>
               <li>
                 <Link 
                 to='discover' 
-                className='text-gray-950 hover:text-stone-300'
+                className='text-slate-300 hover:text-white'
                 >
-                  Discover
+                  DISCOVER
                 </Link>
               </li>
-
+              <li>
+                <Link 
+                to='signup' 
+                className='text-slate-300 hover:text-white'
+                >
+                  SIGN UP
+                </Link>
+              </li>
+              <li>
+                <Link 
+                to='/login' 
+                className='text-slate-300 hover:text-white'
+                >
+                    LOG IN
+                </Link>
+              </li>
               {/* Conditional Profile link render for now */}
               {isAuth && (
                 <li>
                   <Link 
                   to='profile' 
-                  className='text-gray-950 hover:text-stone-300'
+                  className='text-slate-300 hover:text-white'
                   >
-                    Profile
+                    PROFILE
                   </Link>
                 </li>
               )}
             </ul>
           </nav>
-
-        {/* Temporary Sign In/Sign Out Buttons */}
-          {isAuth ? (
-            <button 
-            className='bg-indigo-500 text-white
-            px-4 py-2 rounded-md hover:bg-indigo-600'
-            >
-              Sign Out
-            </button>
-          ) : (
-            <button 
-            className='bg-indigo-500 text-white
-            px-4 py-2 rounded-md hover:bg-indigo-600'
-            >
-              Sign In
-            </button>
-          )}
         </div>
       </div>
     </header>

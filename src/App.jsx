@@ -7,7 +7,8 @@ import Header from "./components/Header";
 import Home from "./pages/Home";
 import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
-import About from "./pages/About";
+import LogIn from "./pages/LogIn";
+import SignUp from "./pages/SignUp";
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/discover" element={<Discover />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/About" element={<About />} />
+        <Route path="/login" element={<LogIn />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Router>
   );
