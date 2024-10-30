@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 function Home() {
   return (
     <div className='bg-indigo-950 text-slate-300 min-h-screen'>
+
+      {/* About Section */}
       <section className='flex flex-col items-center justify-center 
       min-h-screen text-center p-4'>
         <h1 className='text-4xl md:text-6xl font-bold
@@ -22,34 +24,38 @@ function Home() {
           </button>
         </Link>
       </section>
-    
-      <section>
-      <h2>
+
+
+      {/* Feature Overview */}
+      <section className='flex flex-col items-center py-16 px-4 text-center'>
+        <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Create and Manage Your Many Lists
         </h2>
-        <p>
-          MyShowcase lets you create as many lists as you want, as niche 
+        <p className='text-lg md:text-xl max-w-3xl'>
+          MyShowcase let's you create as many lists as you want, as niche 
           as you want. Allowing you to show off and keep track of 
-          your favorite things, you can even explain why theyre your favorite.
+          your favorite things, you can also explain why they're your favorite.
         </p>
       </section>
 
-      <section>
-        <h2>
+      {/* Discover Section */}
+      <section className='flex flex-col items-center py-16 px-4 text-center bg-indigo-900'>
+        <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Discover New Favorites
         </h2>
-        <p>
+        <p className='text-lg md:text-xl max-w-3xl'>
           Look at the favorites of other users, and find inspiration from
           trending and popular picks. With tailored suggestions, you may
           discover your next favorite thing!
         </p>
       </section>
 
-      <section>
-        <h2>
+      {/* Sharing Section */}
+      <section className='flex flex-col items-center py-16 px-4 text-center'>
+        <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Connect and Share
         </h2>
-        <p>
+        <p className='text-lg md:text-xl max-w-3xl'>
           Share your list with friends, other users, or on social.
           Connect with like-minded people and explore shared interests. 
         </p>
