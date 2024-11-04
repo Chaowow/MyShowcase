@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import placeholder from '../assets/placeholder.jpg'
+
 
 function Home() {
   return (
@@ -9,7 +11,7 @@ function Home() {
       <section className='flex flex-col items-center justify-center 
       min-h-screen text-center p-4'>
         <h1 className='text-4xl md:text-6xl font-bold
-         text-white mb-4'>
+         text-white mb-8'>
           Welcome to MyShowcase.
         </h1>
         <p className='text-lg md:text-2xl max-w-xl mb-8'>
@@ -25,9 +27,21 @@ function Home() {
         </Link>
       </section>
 
+      {/* Images */}
+      <section className='flex justify-center space-x-10 mb-4'>
+        <img src={placeholder} alt='placeholder' 
+        className='w-48 h-80 object-cover rounded-lg shadow-lg'/>
+
+        <img src={placeholder} alt='placeholder' 
+        className='w-48 h-80 object-cover rounded-lg shadow-lg'/>
+
+        <img src={placeholder} alt='placeholder' 
+        className='w-48 h-80 object-cover rounded-lg shadow-lg'/>
+        
+      </section>
 
       {/* Feature Overview */}
-      <section className='flex flex-col items-center py-16 px-4 text-center'>
+      <section className='flex flex-col items-center py-28 px-4 text-center'>
         <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Create and Manage Your Many Lists
         </h2>
@@ -39,7 +53,8 @@ function Home() {
       </section>
 
       {/* Discover Section */}
-      <section className='flex flex-col items-center py-16 px-4 text-center bg-indigo-900'>
+      <section className='flex flex-col items-center py-16 px-4 text-center
+      bg-indigo-900'>
         <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Discover New Favorites
         </h2>
@@ -61,15 +76,18 @@ function Home() {
         </p>
       </section>
 
-      <section>
-        <h2>
+      {/* CTA */}
+      <section className='flex flex-col items-center py-16 px-4 text-center
+      bg-indigo-900'>
+        <h2 className='text-3xl md:text-4xl font-semibold text-white mb-12'>
           Dont know where to start?
         </h2>
-          <Link>
-            <button>
-              Start with Discovering
-            </button>
-          </Link>
+        <Link to='discover'>
+          <button className='bg-indigo-500 text-white px-6 py-3 rounded-lg
+          text-lg md:text-xl hover:bg-indigo-600'>
+            Start with Discover
+          </button>
+        </Link>
       </section>
 
     </div>
