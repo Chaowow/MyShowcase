@@ -9,7 +9,7 @@ function Home() {
 
       {/* About Section */}
       <section className='flex flex-col items-center justify-center 
-      min-h-screen text-center p-4'>
+      min-h-screen text-center p-4 mb-0'>
         <h1 className='text-4xl md:text-6xl font-bold
          text-white mb-8'>
           Welcome to MyShowcase.
@@ -41,7 +41,7 @@ function Home() {
       </section>
 
       {/* Feature Overview */}
-      <section className='flex flex-col items-center py-28 px-4 text-center'>
+      <section className='flex flex-col items-center py-28 px-4 text-center mb-12'>
         <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Create and Manage Your Many Lists
         </h2>
@@ -55,10 +55,21 @@ function Home() {
       {/* Discover Section */}
       <section className='flex flex-col items-center py-16 px-4 text-center
       bg-indigo-900'>
+        <section className='flex justify-center space-x-14 mb-20'>
+        <img src={placeholder} alt='placeholder' 
+        className='w-48 h-80 object-cover rounded-lg shadow-lg'/>
+
+        <img src={placeholder} alt='placeholder' 
+        className='w-48 h-80 object-cover rounded-lg shadow-lg'/>
+
+        <img src={placeholder} alt='placeholder' 
+        className='w-48 h-80 object-cover rounded-lg shadow-lg'/>
+        
+      </section>
         <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Discover New Favorites
         </h2>
-        <p className='text-lg md:text-xl max-w-3xl'>
+        <p className='text-lg md:text-xl max-w-3xl mb-12'>
           Look at the favorites of other users, and find inspiration from
           trending and popular picks. With tailored suggestions, you may
           discover your next favorite thing!
@@ -67,6 +78,8 @@ function Home() {
 
       {/* Sharing Section */}
       <section className='flex flex-col items-center py-16 px-4 text-center'>
+        <img src={placeholder} alt='placeholder' className='w-60 h-40 object-fill 
+        rounded-lg shadow-lg mb-4'/>
         <h2 className='text-3xl md:text-4xl font-semibold text-white mb-6'>
           Connect and Share
         </h2>
@@ -80,7 +93,7 @@ function Home() {
       <section className='flex flex-col items-center py-16 px-4 text-center
       bg-indigo-900'>
         <h2 className='text-3xl md:text-4xl font-semibold text-white mb-12'>
-          Dont know where to start?
+          Don't know where to start?
         </h2>
         <Link to='discover'>
           <button className='bg-indigo-500 text-white px-6 py-3 rounded-lg
