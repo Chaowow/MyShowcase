@@ -6,6 +6,7 @@ import {
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
+import Create from "./pages/Create";
 import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
 import LogIn from "./pages/LogIn";
@@ -17,6 +18,7 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/create" element={<Create />} />
         <Route path="/discover" element={<Discover />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<LogIn />} />
