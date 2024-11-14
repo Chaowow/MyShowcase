@@ -48,11 +48,54 @@ function Form ({ open, onSave }) {
 
 function Create() {
     const [open, setOpen] = useState(false);
-    const [userList, setUserList] = useState([]);
+    const [userList, setUserList] = useState([
+        {
+          title: "Favorite Horror Movies",
+          description: "My top horror movies that are truly scary.",
+          movies: [
+            {
+              title: "The Shining",
+              year: 1980,
+              description: "A family heads to an isolated hotel where an evil presence influences the father into violence.",
+              image: "https://via.placeholder.com/100x150",
+            },
+            {
+              title: "Get Out",
+              year: 2017,
+              description: "A young African-American man visits his white girlfriend's parents for the weekend and discovers disturbing secrets.",
+              image: "https://via.placeholder.com/100x150",
+            },
+            {
+              title: "Hereditary",
+              year: 2018,
+              description: "A grieving family is haunted by tragic and disturbing occurrences.",
+              image: "https://via.placeholder.com/100x150",
+            },
+          ],
+        },
+        {
+          title: "Top Sci-Fi Books",
+          description: "Best sci-fi books with gripping plots and futuristic themes.",
+          movies: [
+            {
+              title: "Dune",
+              year: 1965,
+              description: "A young nobleman and his family are caught in a feud over control of a desert planet with a valuable resource.",
+              image: "https://via.placeholder.com/100x150",
+            },
+            {
+              title: "Foundation",
+              year: 1951,
+              description: "A mathematician develops a way to save civilization, foreseeing the fall of a galactic empire.",
+              image: "https://via.placeholder.com/100x150",
+            },
+          ],
+        },
+      ]);
 
     const openForm = () => setOpen(!open);
     const saveList = (list) => {
-        setUserList([...userList, list]);
+        setUserList([...userList, { ...list, movies: [] }]);
     };
 
   return (
@@ -71,6 +114,24 @@ function Create() {
                 <div key={index} className='bg-slate-200 p-4 mb-4 rounded shadow'>
                     <h4 className='text-xl font-semibold'>{list.title}</h4>
                     <p>{list.description}</p>
+                    <div className='mt-4 grid grid-cols-1 sm:grid-cols-2 
+                    md:grid-cols-3 gap-4'>
+                        {list.movies.map((movie, movieIndex) => (
+                            <div 
+                            key={movieIndex} 
+                            className='bg-white p-4 rounded shadow'
+                            > 
+                                <h5 className='text-lg font-semibold'>
+                                    {movie.title} ({movie.year})
+                                </h5>
+                                <img src={movie.image} alt={movie.title} 
+                                className='w-full h-48 object-cover mb-2 rounded'/>
+                                <p className='text-sm text-gray-600'>
+                                    {movie.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             ))}
         </div>
