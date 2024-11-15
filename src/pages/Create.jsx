@@ -1,105 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-
-function Form ({ open, onSave }) {
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave({ title, description });
-
-        setTitle('');
-        setDescription('');
-    };
-
-    return (
-            open ? (
-            <form onSubmit={handleSubmit} className='p-4 border rounded shadow-lg'>
-                <label className='block mb-2 text-white'>List Title</label>
-                <input 
-                    type='text'
-                    value={title}
-                    onChange={(e) =>setTitle(e.target.value)}
-                    className='border p-2 mb-4 w-full bg-slate-200'
-                    placeholder='Enter List Title'
-                    required
-                />
-
-                <label className='block mb-2 text-white'>Description</label>
-                <textarea 
-                    type='text'
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className='border p-2 mb-4 w-full bg-slate-200'
-                    placeholder='Enter Description'
-                    rows='4'
-                ></textarea>
-
-                <button type='submit' className='bg-indigo-500 text-white
-                px-4 py-2 rounded'>
-                    Save List
-                </button>
-            </form>
-        ) : null
-    );
-}
-
+import Form from '../components/Form';
+import SearchResults from '../components/SearchResults';
+import useDebounce from '../hooks/useDebounce';
 
 function Create() {
     const [open, setOpen] = useState(false);
-    const [userList, setUserList] = useState([
-        {
-          title: "Favorite Horror Movies",
-          description: "My top horror movies that are truly scary.",
-          movies: [
-            {
-              title: "The Shining",
-              year: 1980,
-              description: "A family heads to an isolated hotel where an evil presence influences the father into violence.",
-              image: "https://via.placeholder.com/100x150",
-            },
-            {
-              title: "Get Out",
-              year: 2017,
-              description: "A young African-American man visits his white girlfriend's parents for the weekend and discovers disturbing secrets.",
-              image: "https://via.placeholder.com/100x150",
-            },
-            {
-              title: "Hereditary",
-              year: 2018,
-              description: "A grieving family is haunted by tragic and disturbing occurrences.",
-              image: "https://via.placeholder.com/100x150",
-            },
-          ],
-        },
-        {
-          title: "Top Sci-Fi Books",
-          description: "Best sci-fi books with gripping plots and futuristic themes.",
-          movies: [
-            {
-              title: "Dune",
-              year: 1965,
-              description: "A young nobleman and his family are caught in a feud over control of a desert planet with a valuable resource.",
-              image: "https://via.placeholder.com/100x150",
-            },
-            {
-              title: "Foundation",
-              year: 1951,
-              description: "A mathematician develops a way to save civilization, foreseeing the fall of a galactic empire.",
-              image: "https://via.placeholder.com/100x150",
-            },
-          ],
-        },
-      ]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResult, setSearchResults] = useState(null);
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    const [userList, setUserList] = useState([]);
 
     const openForm = () => setOpen(!open);
     const saveList = (list) => {
         setUserList([...userList, { ...list, movies: [] }]);
     };
 
+    const fetchMovies = async (query) => {
+        const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+        try {
+            const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
+                params: {
+                    api_key: apiKey,
+                    query: query
+                },
+            });
+            setSearchResults(response.data.results);
+        } catch (err) {
+            console.error('Error fetching data:', err);
+        }
+    };
+
+    useEffect(() => {
+        if (debouncedSearchQuery) {
+            fetchMovies(debouncedSearchQuery);
+        } else {
+            setSearchResults(null);
+        }
+    }, [debouncedSearchQuery]);
+
   return (
     <div className='bg-indigo-950 p-6 min-h-screen'>
+
+         {/* Search Input */}
+         <input 
+            type='text'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder='Search for something...'
+            className='p-2 border rounded w-full mb-4'
+        />
+
+        {/*  Search Results */}
+        <SearchResults searchResults={searchResult} />
+
         <button className='bg-indigo-500 text-white mb-4 px-4 py-2
         rounded' onClick={openForm}>
             CREATE NEW LIST
@@ -107,6 +61,7 @@ function Create() {
 
         <Form open={open} onSave={saveList}/>
 
+        {/* User List */}
         <div className='mt-8'>
             {userList.length > 0 && 
             <h3 className='text-2xl text-white mb-4'>Your Lists:</h3>}
