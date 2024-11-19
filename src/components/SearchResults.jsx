@@ -9,11 +9,12 @@ function SearchResults({ searchResults, onAddMovie }) {
                 {searchResults.length === 0 ? (
                     <p className='text-slate-300'>No results found.</p>
                 ) : (
-                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 
+                    gap-4 mb-6'>
                         {searchResults.map((movie) => (
                             <div 
                                 key={movie.id} 
-                                className='bg-indigo-900/75 p-4 rounded shadow
+                                className='bg-indigo-900/75 sm:p-6 rounded shadow
                                 flex flex-col'
                             >
                                 {movie.poster_path && (

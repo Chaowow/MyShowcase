@@ -20,18 +20,34 @@ function Create() {
         const selectedListTitle = prompt(
             'Enter the title of the list to which you want to add this movie:'
         );
-
+    
         if (!selectedListTitle) return;
+    
+        // Create a structured object for the movie
+        const movieToAdd = {
+            title: movie.title || 'Unknown Title',
+            release_date: movie.release_date
+                ? new Date(movie.release_date).getFullYear()
+                : 'Year not available',
+            overview: movie.overview || 'No description available.',
+            poster_path: movie.poster_path
+                ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+                : 'https://via.placeholder.com/300x450?text=No+Image',
+        };
+    
 
-        setUserList((prevLists) => 
-            prevLists.map((list) => 
+    console.log("Movie to Add:", movieToAdd); // Inspect the data structure
+
+        // Update the userList with the new movie
+        setUserList((prevLists) =>
+            prevLists.map((list) =>
                 list.title === selectedListTitle
-                ? { ...list, movies: [...list.movies, movie] }
-                : list
+                    ? { ...list, movies: [...list.movies, movieToAdd] }
+                    : list
             )
         );
     };
-
+    
     const fetchMovies = async (query) => {
         const apiKey = import.meta.env.VITE_TMDB_API_KEY;
         try {
@@ -93,12 +109,12 @@ function Create() {
                             className='bg-white p-4 rounded shadow'
                             > 
                                 <h5 className='text-lg font-semibold'>
-                                    {movie.title} ({movie.year})
+                                    {movie.title} ({movie.release_date})
                                 </h5>
-                                <img src={movie.image} alt={movie.title} 
+                                <img src={movie.poster_path} alt={movie.title} 
                                 className='w-full h-48 object-cover mb-2 rounded'/>
                                 <p className='text-sm text-gray-600'>
-                                    {movie.description}
+                                    {movie.overview}
                                 </p>
                             </div>
                         ))}
