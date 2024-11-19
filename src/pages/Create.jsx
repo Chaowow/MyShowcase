@@ -16,6 +16,22 @@ function Create() {
         setUserList([...userList, { ...list, movies: [] }]);
     };
 
+    const addMovieToList = (movie) => {
+        const selectedListTitle = prompt(
+            'Enter the title of the list to which you want to add this movie:'
+        );
+
+        if (!selectedListTitle) return;
+
+        setUserList((prevLists) => 
+            prevLists.map((list) => 
+                list.title === selectedListTitle
+                ? { ...list, movies: [...list.movies, movie] }
+                : list
+            )
+        );
+    };
+
     const fetchMovies = async (query) => {
         const apiKey = import.meta.env.VITE_TMDB_API_KEY;
         try {
@@ -52,7 +68,7 @@ function Create() {
         />
 
         {/*  Search Results */}
-        <SearchResults searchResults={searchResult} />
+        <SearchResults searchResults={searchResult} onAddMovie={addMovieToList} />
 
         <button className='bg-indigo-500 text-white mb-4 px-4 py-2
         rounded' onClick={openForm}>

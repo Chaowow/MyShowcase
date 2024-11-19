@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SearchResults({ searchResults }) {
+function SearchResults({ searchResults, onAddMovie }) {
   return (
     <div>
         {searchResults ? (
@@ -13,10 +13,11 @@ function SearchResults({ searchResults }) {
                         {searchResults.map((movie) => (
                             <div 
                                 key={movie.id} 
-                                className='bg-slate-200 p-4 rounded shadow'
+                                className='bg-indigo-900/75 p-4 rounded shadow
+                                flex flex-col'
                             >
                                 {movie.poster_path && (
-                                    <div className='flex justify-center items-center'>
+                                    <div className='flex justify-center items-center mb-4'>
                                         <img
                                             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                                             alt={movie.title}
@@ -25,13 +26,25 @@ function SearchResults({ searchResults }) {
                                         />
                                  </div>
                                 )}
-                                <h4 className="text-xl font-semibold">{movie.title}</h4>
-                                <h5 className="text-sm text-gray-900 mb-2">
-                                    {movie.release_date
-                                        ? new Date(movie.release_date).getFullYear()
-                                        : 'Year not available'}
-                                </h5>
-                                <p className="text-sm text-gray-600">{movie.overview}</p>
+                                <div className='flex-1'>
+                                    <h4 className="text-xl font-semibold text-slate-100">{movie.title}</h4>
+                                    <h5 className="text-sm text-slate-300 mb-2">
+                                        {movie.release_date
+                                            ? new Date(movie.release_date).getFullYear()
+                                            : 'Year not available'}
+                                    </h5>
+                                    <p className="text-sm text-slate-400">{movie.overview}</p>
+                                </div>
+
+                                <div className='mt-4'>
+                                    <button
+                                        onClick={() => onAddMovie(movie)}
+                                        className='bg-indigo-500 px-4 py-2 rounded text-white
+                                        hover:bg-indigo-600 w-full'
+                                    >
+                                        Add to List
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
