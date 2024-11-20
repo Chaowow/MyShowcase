@@ -23,7 +23,6 @@ function Create() {
     
         if (!selectedListTitle) return;
     
-        // Create a structured object for the movie
         const movieToAdd = {
             title: movie.title || 'Unknown Title',
             release_date: movie.release_date
@@ -35,10 +34,6 @@ function Create() {
                 : 'https://via.placeholder.com/300x450?text=No+Image',
         };
     
-
-    console.log("Movie to Add:", movieToAdd); // Inspect the data structure
-
-        // Update the userList with the new movie
         setUserList((prevLists) =>
             prevLists.map((list) =>
                 list.title === selectedListTitle
@@ -98,22 +93,30 @@ function Create() {
             {userList.length > 0 && 
             <h3 className='text-2xl text-white mb-4'>Your Lists:</h3>}
             {userList.map((list, index) => (
-                <div key={index} className='bg-slate-200 p-4 mb-4 rounded shadow'>
-                    <h4 className='text-xl font-semibold'>{list.title}</h4>
-                    <p>{list.description}</p>
-                    <div className='mt-4 grid grid-cols-1 sm:grid-cols-2 
-                    md:grid-cols-3 gap-4'>
+                <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
+
+                    <h4 className='text-3xl font-bold text-slate-100 mb-2'>{list.title}</h4>
+                    <p className='text-md font-semibold text-slate-300 mb-2'>{list.description}</p>
+                    <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
+                    md:grid-cols-3 gap-6'>
+
                         {list.movies.map((movie, movieIndex) => (
                             <div 
                             key={movieIndex} 
-                            className='bg-white p-4 rounded shadow'
+                            className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center
+                            hover:shadow-lg hover:scale-105 transition-transform duration-200'
                             > 
-                                <h5 className='text-lg font-semibold'>
-                                    {movie.title} ({movie.release_date})
+
+                                <h5 className='text-lg font-bold text-gray-800 mb-2'>
+                                    {movie.title}
                                 </h5>
+                                <p className='text-sm text-gray-600 mb-4'>
+                                    {movie.release_date}
+                                </p>
                                 <img src={movie.poster_path} alt={movie.title} 
-                                className='w-full h-48 object-cover mb-2 rounded'/>
-                                <p className='text-sm text-gray-600'>
+                                className='w-32 sm:w-40 md:w-64 h-auto 
+                                object-contain mb-4 rounded'/>
+                                <p className='text-sm text-gray-600 '>
                                     {movie.overview}
                                 </p>
                             </div>
