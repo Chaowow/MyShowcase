@@ -98,7 +98,10 @@ function Create() {
 
                         <div>
                             <h4 className='font-bold'>{list.title}</h4>
-                            <p className='text-sm text-gray-600'>{list.description}</p>
+                            <p className='text-sm text-gray-600 overflow-hidden text-ellipsis
+                            line-clamp-2'>
+                                {list.description}
+                            </p>
                         </div>
 
                         <button 
@@ -109,7 +112,7 @@ function Create() {
                             className='bg-indigo-500 text-white px-3 py-1 rounded
                             hover:bg-indigo-600'
                         >
-                            Add to List
+                            Add
                         </button>
                     </li>
                 ))}
@@ -132,7 +135,10 @@ function Create() {
                 <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
 
                     <h4 className='text-3xl font-bold text-slate-100 mb-2'>{list.title}</h4>
-                    <p className='text-md font-semibold text-slate-300 mb-2'>{list.description}</p>
+                    <p className='text-md font-semibold text-slate-300 mb-2 break-words
+                    whitespace-normal'>
+                        {list.description}
+                    </p>
                     <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
                     md:grid-cols-3 gap-6'>
 

@@ -3,6 +3,15 @@ import { useState } from "react";
 function Form ({ open, onSave }) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const maxCharCount = 52;
+
+    const handleTitleChange = (e) => {
+        const value = e.target.value;
+
+        if (value.length <= maxCharCount) {
+            setTitle(value);
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -19,9 +28,9 @@ function Form ({ open, onSave }) {
                 <input 
                     type='text'
                     value={title}
-                    onChange={(e) =>setTitle(e.target.value)}
+                    onChange={handleTitleChange}
                     className='border p-2 mb-4 w-full bg-slate-200'
-                    placeholder='Enter Title'
+                    placeholder={`Enter Title (Max ${maxCharCount} words)`}
                     required
                 />
 
