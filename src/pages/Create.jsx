@@ -3,26 +3,33 @@ import axios from 'axios';
 import Form from '../components/Form';
 import SearchResults from '../components/SearchResults';
 import useDebounce from '../hooks/useDebounce';
+import Modal from '../components/Modal';
 
 function Create() {
     const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResult, setSearchResults] = useState(null);
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
     const [userList, setUserList] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedMovie, setSelectedMovie] = useState(null);
+
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+    useEffect(() => {
+        if (debouncedSearchQuery) {
+            fetchMovies(debouncedSearchQuery);
+        } else {
+            setSearchResults(null);
+        }
+    }, [debouncedSearchQuery]);
 
     const openForm = () => setOpen(!open);
+
     const saveList = (list) => {
         setUserList([...userList, { ...list, movies: [] }]);
     };
 
-    const addMovieToList = (movie) => {
-        const selectedListTitle = prompt(
-            'Enter the title of the list to which you want to add this movie:'
-        );
-    
-        if (!selectedListTitle) return;
-    
+    const addMovieToList = (listTitle, movie) => {
         const movieToAdd = {
             title: movie.title || 'Unknown Title',
             release_date: movie.release_date
@@ -36,7 +43,7 @@ function Create() {
     
         setUserList((prevLists) =>
             prevLists.map((list) =>
-                list.title === selectedListTitle
+                list.title === listTitle
                     ? { ...list, movies: [...list.movies, movieToAdd] }
                     : list
             )
@@ -58,13 +65,15 @@ function Create() {
         }
     };
 
-    useEffect(() => {
-        if (debouncedSearchQuery) {
-            fetchMovies(debouncedSearchQuery);
-        } else {
-            setSearchResults(null);
-        }
-    }, [debouncedSearchQuery]);
+    const openModal = (movie) => {
+        setSelectedMovie(movie);
+        setIsModalOpen(true);
+    }
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedMovie(null);
+    }
 
   return (
     <div className='bg-indigo-950 p-6 min-h-screen'>
@@ -79,7 +88,33 @@ function Create() {
         />
 
         {/*  Search Results */}
-        <SearchResults searchResults={searchResult} onAddMovie={addMovieToList} />
+        <SearchResults searchResults={searchResult} onOpenModal={openModal} />
+        
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+            <h3 className='text-xl font-semibold mb-4'>Select a List</h3>
+            <ul>
+                {userList.map((list, index) => (
+                    <li key={index} className='border-b py-2 flex justify-between items-center'>
+
+                        <div>
+                            <h4 className='font-bold'>{list.title}</h4>
+                            <p className='text-sm text-gray-600'>{list.description}</p>
+                        </div>
+
+                        <button 
+                            onClick={() => {
+                                addMovieToList(list.title, selectedMovie);
+                                closeModal();
+                            }}
+                            className='bg-indigo-500 text-white px-3 py-1 rounded
+                            hover:bg-indigo-600'
+                        >
+                            Add to List
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </Modal>
 
         <button className='bg-indigo-500 text-white mb-4 px-4 py-2
         rounded' onClick={openForm}>
@@ -93,6 +128,7 @@ function Create() {
             {userList.length > 0 && 
             <h3 className='text-2xl text-white mb-4'>Your Lists:</h3>}
             {userList.map((list, index) => (
+
                 <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
 
                     <h4 className='text-3xl font-bold text-slate-100 mb-2'>{list.title}</h4>
@@ -101,6 +137,7 @@ function Create() {
                     md:grid-cols-3 gap-6'>
 
                         {list.movies.map((movie, movieIndex) => (
+
                             <div 
                             key={movieIndex} 
                             className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center

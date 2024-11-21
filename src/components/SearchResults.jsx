@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SearchResults({ searchResults, onAddMovie }) {
+function SearchResults({ searchResults, onOpenModal }) {
   return (
     <div>
         {searchResults ? (
@@ -39,7 +39,7 @@ function SearchResults({ searchResults, onAddMovie }) {
 
                                 <div className='mt-4'>
                                     <button
-                                        onClick={() => onAddMovie(movie)}
+                                        onClick={() => onOpenModal(movie)}
                                         className='bg-indigo-500 px-4 py-2 rounded text-white
                                         hover:bg-indigo-600 w-full'
                                     >

@@ -21,7 +21,7 @@ function Form ({ open, onSave }) {
                     value={title}
                     onChange={(e) =>setTitle(e.target.value)}
                     className='border p-2 mb-4 w-full bg-slate-200'
-                    placeholder='Enter List Title'
+                    placeholder='Enter Title'
                     required
                 />
 
