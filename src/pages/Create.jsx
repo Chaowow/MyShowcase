@@ -76,8 +76,63 @@ function Create() {
     }
 
   return (
-    <div className='bg-indigo-950 p-6 min-h-screen'>
+    <div className='bg-indigo-950 p-6 min-h-screen overflow-x-hidden'>
+        <button className='bg-indigo-500 text-white mb-4 px-4 py-2
+        rounded' onClick={openForm}>
+                CREATE NEW LIST
+        </button>
 
+        <Form open={open} onSave={saveList}/>
+
+        {/* User List */}
+        <div className='mt-8'>
+            {userList.length > 0 && 
+            <h3 className='text-2xl text-white mb-4'>Your Lists:</h3>}
+            {userList.map((list, index) => (
+
+                <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
+
+                    <h4 className='text-2xl sm:text-3xl font-bold text-slate-100 mb-2 
+                    break-words whitespace-normal'>
+                        {list.title}
+                    </h4>
+                    <p className='text-md font-semibold text-slate-300 mb-2 break-words
+                    whitespace-normal'>
+                        {list.description}
+                    </p>
+
+                    <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
+                    md:grid-cols-3 gap-6'>
+
+                        {list.movies.map((movie, movieIndex) => (
+
+                            <div 
+                            key={movieIndex} 
+                            className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center
+                            hover:shadow-lg hover:scale-105 transition-transform duration-200'
+                            > 
+
+                                <h5 className='text-lg font-bold text-gray-800 mb-2'>
+                                    {movie.title}
+                                </h5>
+
+                                <p className='text-sm text-gray-600 mb-4'>
+                                    {movie.release_date}
+                                </p>
+
+                                <img src={movie.poster_path} alt={movie.title} 
+                                className='w-32 sm:w-40 md:w-64 h-auto 
+                                object-contain mb-4 rounded'/>
+
+                                <p className='text-sm text-gray-600 '>
+                                    {movie.overview}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
          {/* Search Input */}
          <input 
             type='text'
@@ -96,13 +151,10 @@ function Create() {
                 {userList.map((list, index) => (
                     <li key={index} className='border-b py-2 flex justify-between items-center'>
 
-                        <div>
-                            <h4 className='font-bold'>{list.title}</h4>
-                            <p className='text-sm text-gray-600 overflow-hidden text-ellipsis
-                            line-clamp-2'>
-                                {list.description}
-                            </p>
-                        </div>
+                        <h4 className='flex-1 font-bold text-xs sm:text-sm lg:text-base overflow-hidden text-ellipsis 
+                        whitespace-nowrap max-w-[80%]'>
+                            {list.title}
+                        </h4>
 
                         <button 
                             onClick={() => {
@@ -119,55 +171,7 @@ function Create() {
             </ul>
         </Modal>
 
-        <button className='bg-indigo-500 text-white mb-4 px-4 py-2
-        rounded' onClick={openForm}>
-            CREATE NEW LIST
-        </button>
-
-        <Form open={open} onSave={saveList}/>
-
-        {/* User List */}
-        <div className='mt-8'>
-            {userList.length > 0 && 
-            <h3 className='text-2xl text-white mb-4'>Your Lists:</h3>}
-            {userList.map((list, index) => (
-
-                <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
-
-                    <h4 className='text-3xl font-bold text-slate-100 mb-2'>{list.title}</h4>
-                    <p className='text-md font-semibold text-slate-300 mb-2 break-words
-                    whitespace-normal'>
-                        {list.description}
-                    </p>
-                    <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
-                    md:grid-cols-3 gap-6'>
-
-                        {list.movies.map((movie, movieIndex) => (
-
-                            <div 
-                            key={movieIndex} 
-                            className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center
-                            hover:shadow-lg hover:scale-105 transition-transform duration-200'
-                            > 
-
-                                <h5 className='text-lg font-bold text-gray-800 mb-2'>
-                                    {movie.title}
-                                </h5>
-                                <p className='text-sm text-gray-600 mb-4'>
-                                    {movie.release_date}
-                                </p>
-                                <img src={movie.poster_path} alt={movie.title} 
-                                className='w-32 sm:w-40 md:w-64 h-auto 
-                                object-contain mb-4 rounded'/>
-                                <p className='text-sm text-gray-600 '>
-                                    {movie.overview}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            ))}
-        </div>
+        
     </div>
   );
 }
