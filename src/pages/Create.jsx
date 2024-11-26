@@ -92,10 +92,21 @@ function Create() {
 
                 <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
 
-                    <h4 className='text-2xl sm:text-3xl font-bold text-slate-100 mb-2 
-                    break-words whitespace-normal'>
-                        {list.title}
-                    </h4>
+                    <div className='flex justify-between items-center mb-2'>
+                        <h4 className='text-2xl sm:text-3xl font-bold text-slate-100 
+                        break-words whitespace-normal'>
+                            {list.title}
+                        </h4>
+                        <button onClick={() => { if (window.confirm(`Are you sure you want to delete the list: ${list.title}?`)) {
+                            setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
+                            }
+                        }}
+                        className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-700'
+                        >
+                            Delete
+                        </button>
+                    </div>
+
                     <p className='text-md font-semibold text-slate-300 mb-2 break-words
                     whitespace-normal'>
                         {list.description}

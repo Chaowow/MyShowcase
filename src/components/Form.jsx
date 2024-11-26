@@ -30,7 +30,7 @@ function Form ({ open, onSave }) {
                     value={title}
                     onChange={handleTitleChange}
                     className='border p-2 mb-4 w-full bg-slate-200'
-                    placeholder={`Enter Title (Max ${maxCharCount} words)`}
+                    placeholder={`Enter Title (Max ${maxCharCount} characters)`}
                     required
                 />
 

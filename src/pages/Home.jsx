@@ -22,7 +22,7 @@ function Home() {
           Share with your friends.
         </p>
 
-        <Link to="signup">
+        <Link to="create">
           <button className='bg-indigo-500 text-white px-6 py-3
           rounded-lg text-lg md:text-xl hover:bg-indigo-600'>
             Get Started!
