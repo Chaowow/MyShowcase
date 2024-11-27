@@ -12,9 +12,11 @@ function Create() {
     const [userList, setUserList] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMovie, setSelectedMovie] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempTitle, setTempTitle] = useState('');
+    const [tempDescription, setTempDescription] = useState('');
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
-
     useEffect(() => {
         if (debouncedSearchQuery) {
             fetchMovies(debouncedSearchQuery);
@@ -22,7 +24,7 @@ function Create() {
             setSearchResults(null);
         }
     }, [debouncedSearchQuery]);
-
+    
     const openForm = () => setOpen(!open);
 
     const saveList = (list) => {
@@ -93,24 +95,86 @@ function Create() {
                 <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
 
                     <div className='flex justify-between items-center mb-2'>
-                        <h4 className='text-2xl sm:text-3xl font-bold text-slate-100 
-                        break-words whitespace-normal'>
-                            {list.title}
-                        </h4>
-                        <button onClick={() => { if (window.confirm(`Are you sure you want to delete the list: ${list.title}?`)) {
-                            setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
-                            }
-                        }}
-                        className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-700'
-                        >
-                            Delete
-                        </button>
+
+                        {isEditing === index ? (
+                            <div className='w-full'>
+                                <input 
+                                    type='text'
+                                    value={tempTitle}
+                                    onChange={(e) => setTempTitle(e.target.value)}
+                                    className='border rounded p-2 w-full mb-2'
+                                    placeholder='Edit Title'
+                                />
+                                <textarea
+                                    value={tempDescription}
+                                    onChange={(e) => setTempDescription(e.target.value)}
+                                    className='border rounded p-2 w-full mb-2'
+                                    rows='3'
+                                    placeholder='Edit Description'
+                                ></textarea>
+                                
+                                <div className='flex space-x-2'>
+                                    <button
+                                        onClick={() => {
+                                            setUserList((prevLists) =>
+                                                prevLists.map((item, i) => 
+                                                    i === index 
+                                                        ? { ...item, title: tempTitle, description: tempDescription }
+                                                        : item
+                                                )
+                                            );
+                                            setIsEditing(null);
+                                        }}
+                                        className='bg-green-500 text-white px-4 py-3 rounded hover:bg-green-600'
+                                    >
+                                        Save
+                                    </button>
+                                    <button
+                                        onClick={() => setIsEditing(null)}
+                                        className='bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600'
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <h4 className='text-2xl sm:text-3xl font-bold text-slate-100 
+                                break-words whitespace-normal'>
+                                    {list.title}
+                                </h4>
+                                <div className='flex space-x-2'>
+                                    <button
+                                        onClick={() => {
+                                            setIsEditing(index);
+                                            setTempTitle(list.title);
+                                            setTempDescription(list.description);
+                                        }}
+                                        className='bg-blue-500 text-white px-2 py-1.5 rounded hover:bg-blue-600'
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm(`Are you sure you want to delete the list: ${list.title}?`)) {
+                                                setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
+                                            }
+                                        }}
+                                        className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-600'
+                                    >    
+                                        Delete
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
 
-                    <p className='text-md font-semibold text-slate-300 mb-2 break-words
-                    whitespace-normal'>
-                        {list.description}
-                    </p>
+                    {isEditing !== index && (
+                        <p className='text-md font-semibold text-slate-300 mb-2 break-words
+                        whitespace-normal'>
+                            {list.description}
+                        </p>
+                    )}
 
                     <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
                     md:grid-cols-3 gap-6'>
