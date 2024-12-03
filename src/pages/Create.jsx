@@ -15,6 +15,14 @@ function Create() {
     const [isEditing, setIsEditing] = useState(false);
     const [tempTitle, setTempTitle] = useState('');
     const [tempDescription, setTempDescription] = useState('');
+    const [collapsedLists, setCollapsedLists] = useState(() => {
+        const initialState = {};
+        userList.forEach((_, index) => {
+            initialState[index] = false;
+        });
+
+        return initialState
+    });
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
     useEffect(() => {
@@ -143,68 +151,86 @@ function Create() {
                                 break-words whitespace-normal'>
                                     {list.title}
                                 </h4>
+
                                 <div className='flex space-x-2'>
-                                    <button
-                                        onClick={() => {
-                                            setIsEditing(index);
-                                            setTempTitle(list.title);
-                                            setTempDescription(list.description);
-                                        }}
+                                    <button 
+                                        onClick={() => setCollapsedLists((prev) => ({
+                                            ...prev,
+                                            [index]: !prev[index]
+                                        }))}
                                         className='bg-blue-500 text-white px-2 py-1.5 rounded hover:bg-blue-600'
                                     >
-                                        Edit
+                                        {collapsedLists[index] ? '+' : '-'}
                                     </button>
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm(`Are you sure you want to delete the list: ${list.title}?`)) {
-                                                setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
-                                            }
-                                        }}
-                                        className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-600'
-                                    >    
-                                        Delete
-                                    </button>
+
+                                    {!collapsedLists[index] && (
+                                        <>
+                                            <button
+                                                onClick={() => {
+                                                    setIsEditing(index);
+                                                    setTempTitle(list.title);
+                                                    setTempDescription(list.description);
+                                                }}
+                                                className='bg-blue-500 text-white px-2 py-1.5 rounded hover:bg-blue-600'
+                                            >
+                                                Edit
+                                            </button>
+                                    
+                                            <button
+                                                onClick={() => {
+                                                    if (window.confirm(`Are you sure you want to delete the list: ${list.title}?`)) {
+                                                        setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
+                                                    }
+                                                }}
+                                                className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-600'
+                                            >    
+                                                Delete
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </>
                         )}
                     </div>
 
-                    {isEditing !== index && (
-                        <p className='text-md font-semibold text-slate-300 mb-2 break-words
-                        whitespace-normal'>
-                            {list.description}
-                        </p>
-                    )}
+                    {isEditing !== index && !collapsedLists[index] && (
+                        <>
+                            <p className='text-md font-semibold text-slate-300 mb-2 break-words
+                            whitespace-normal'>
+                                {list.description}
+                            </p>
 
-                    <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
-                    md:grid-cols-3 gap-6'>
+                            <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
+                            md:grid-cols-3 lg:grid-cols-4 gap-6'>
 
-                        {list.movies.map((movie, movieIndex) => (
+                                {list.movies.map((movie, movieIndex) => (
 
-                            <div 
-                            key={movieIndex} 
-                            className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center
-                            hover:shadow-lg hover:scale-105 transition-transform duration-200'
-                            > 
+                                    <div 
+                                    key={movieIndex} 
+                                    className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center
+                                    hover:shadow-lg hover:scale-105 transition-transform duration-200'
+                                    > 
 
-                                <h5 className='text-lg font-bold text-gray-800 mb-2'>
-                                    {movie.title}
-                                </h5>
+                                        <h5 className='text-lg font-bold text-gray-800 mb-2'>
+                                            {movie.title}
+                                        </h5>
 
-                                <p className='text-sm text-gray-600 mb-4'>
-                                    {movie.release_date}
-                                </p>
+                                        <p className='text-sm text-gray-600 mb-4'>
+                                            {movie.release_date}
+                                        </p>
 
-                                <img src={movie.poster_path} alt={movie.title} 
-                                className='w-32 sm:w-40 md:w-64 h-auto 
-                                object-contain mb-4 rounded'/>
+                                        <img src={movie.poster_path} alt={movie.title} 
+                                        className='w-32 sm:w-40 md:w-64 h-auto 
+                                        object-contain mb-4 rounded'/>
 
-                                <p className='text-sm text-gray-600 '>
-                                    {movie.overview}
-                                </p>
+                                        <p className='text-sm text-gray-600 '>
+                                            {movie.overview}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        </>
+                    )}
                 </div>
             ))}
         </div>
