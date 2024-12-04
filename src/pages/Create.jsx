@@ -21,7 +21,7 @@ function Create() {
             initialState[index] = false;
         });
 
-        return initialState
+        return initialState;
     });
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -207,12 +207,27 @@ function Create() {
 
                                     <div 
                                     key={movieIndex} 
-                                    className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center
-                                    hover:shadow-lg hover:scale-105 transition-transform duration-200'
+                                    className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center relative
+                                    hover:shadow-lg '
                                     > 
-
+                                        <button 
+                                            onClick={() => {
+                                                if (window.confirm(`Are you sure you want to delete the movie: ${movie.title}?`)) {
+                                                    setUserList((prevLists) => prevLists.map((list, i) => 
+                                                        i === index ? { ...list, movies: list.movies.filter((_, j) => j !== movieIndex), } 
+                                                        : list
+                                                        )
+                                                    )
+                                                }
+                                            }}
+                                            className='absolute py-3 top-2 right-2 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center 
+                                            bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
+                                        >
+                                            &times;    
+                                        </button>
+                                        
                                         <h5 className='text-lg font-bold text-gray-800 mb-2'>
-                                            {movie.title}
+                                                {movie.title}
                                         </h5>
 
                                         <p className='text-sm text-gray-600 mb-4'>
