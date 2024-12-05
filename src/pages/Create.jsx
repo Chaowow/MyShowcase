@@ -85,6 +85,20 @@ function Create() {
         setSelectedMovie(null);
     }
 
+    const getMedalStyle = (movieIndex) => {
+        if (movieIndex === 0) {
+            return { background: 'bg-yellow-400', border: 'border-yellow-400 border-4', text: '1st'};
+        }
+        if (movieIndex === 1) {
+            return { background: 'bg-gray-400', border: 'border-gray-400 border-4', text: '2nd'};
+        }
+        if (movieIndex === 2) {
+            return { background: 'bg-yellow-700', border: 'border-yellow-700 border-4', text: '3rd'};
+        }
+
+        return { background: 'bg-indigo-200', border: 'border-indigo-200', text: movieIndex + 1 }
+    }
+
   return (
     <div className='bg-indigo-950 p-6 min-h-screen overflow-x-hidden'>
         <button className='bg-indigo-500 text-white mb-4 px-4 py-2
@@ -203,46 +217,56 @@ function Create() {
                             <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
                             md:grid-cols-3 lg:grid-cols-4 gap-6'>
 
-                                {list.movies.map((movie, movieIndex) => (
+                                {list.movies.map((movie, movieIndex) => {
+                                    const { background, border, text } = getMedalStyle(movieIndex);
 
-                                    <div 
-                                    key={movieIndex} 
-                                    className='bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center relative
-                                    hover:shadow-lg '
-                                    > 
-                                        <button 
-                                            onClick={() => {
-                                                if (window.confirm(`Are you sure you want to delete the movie: ${movie.title}?`)) {
-                                                    setUserList((prevLists) => prevLists.map((list, i) => 
-                                                        i === index ? { ...list, movies: list.movies.filter((_, j) => j !== movieIndex), } 
-                                                        : list
+                                    return (
+                                        <div 
+                                        key={movieIndex} 
+                                        className={`bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center relative
+                                        hover:shadow-lg border-2 ${border}`}
+                                        > 
+                                            <button 
+                                                onClick={() => {
+                                                    if (window.confirm(`Are you sure you want to delete the movie: ${movie.title}?`)) {
+                                                        setUserList((prevLists) => prevLists.map((list, i) => 
+                                                            i === index ? { ...list, movies: list.movies.filter((_, j) => j !== movieIndex), } 
+                                                            : list
+                                                            )
                                                         )
-                                                    )
-                                                }
-                                            }}
-                                            className='absolute py-3 top-2 right-2 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center 
-                                            bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
-                                        >
-                                            &times;    
-                                        </button>
+                                                    }
+                                                }}
+                                                className='absolute py-3 top-2 right-2 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center 
+                                                bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
+                                                aria-label={`Delete ${movie.title}`}
+                                            >
+                                                &times;    
+                                            </button>
+
                                         
-                                        <h5 className='text-lg font-bold text-gray-800 mb-2'>
-                                                {movie.title}
-                                        </h5>
+                                            <h5 className={`absolute top-2 left-2 w-8 h-8 flex items-center justify-center ${background}
+                                            text-xs sm:text-sm md:text-base rounded-full font-bold shadow`}>
+                                                {text}
+                                            </h5>
+                                            
+                                            <h5 className='mt-6 text-lg font-bold text-gray-800 text-center'>
+                                                    {movie.title}
+                                            </h5>
 
-                                        <p className='text-sm text-gray-600 mb-4'>
-                                            {movie.release_date}
-                                        </p>
+                                            <p className='text-sm text-gray-600 mb-4'>
+                                                {movie.release_date}
+                                            </p>
 
-                                        <img src={movie.poster_path} alt={movie.title} 
-                                        className='w-32 sm:w-40 md:w-64 h-auto 
-                                        object-contain mb-4 rounded'/>
+                                            <img src={movie.poster_path} alt={movie.title} 
+                                            className='w-32 sm:w-40 md:w-64 h-auto 
+                                            object-contain mb-4 rounded'/>
 
-                                        <p className='text-sm text-gray-600 '>
-                                            {movie.overview}
-                                        </p>
-                                    </div>
-                                ))}
+                                            <p className='text-sm text-gray-600 '>
+                                                {movie.overview}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </>
                     )}
