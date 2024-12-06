@@ -4,6 +4,7 @@ import Form from '../components/Form';
 import SearchResults from '../components/SearchResults';
 import useDebounce from '../hooks/useDebounce';
 import Modal from '../components/Modal';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function Create() {
     const [open, setOpen] = useState(false);
@@ -23,9 +24,7 @@ function Create() {
 
         return initialState;
     });
-
-    const maxChar = 52;
-
+    
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
     useEffect(() => {
         if (debouncedSearchQuery) {
@@ -34,7 +33,9 @@ function Create() {
             setSearchResults(null);
         }
     }, [debouncedSearchQuery]);
-    
+
+    const maxChar = 52;
+
     const openForm = () => setOpen(!open);
 
     const saveList = (list) => {
@@ -100,6 +101,25 @@ function Create() {
 
         return { background: 'bg-indigo-200', border: 'border-indigo-200', text: movieIndex + 1 }
     }
+
+    const handleDragEnd = (result, listIndex) => {
+        if (!result.destination) return;
+
+        const sourceIndex = result.source.index;
+        const destinationIndex = result.destination.index;
+
+        setUserList((prevLists) => 
+            prevLists.map((list, i) => {
+                if (i !== listIndex) return list;
+
+                const updatedMovies = Array.from(list.movies);
+                const [movedMovie] = updatedMovies.splice(sourceIndex, 1);
+                updatedMovies.splice(destinationIndex, 0, movedMovie);
+
+                return { ...list, movies: updatedMovies};
+            })
+        );
+    };
 
   return (
     <div className='bg-indigo-950 p-6 min-h-screen overflow-x-hidden'>
@@ -220,60 +240,82 @@ function Create() {
                                 {list.description}
                             </p>
 
-                            <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 
-                            md:grid-cols-3 lg:grid-cols-4 gap-6'>
-
-                                {list.movies.map((movie, movieIndex) => {
-                                    const { background, border, text } = getMedalStyle(movieIndex);
-
-                                    return (
-                                        <div 
-                                        key={movieIndex} 
-                                        className={`bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center relative
-                                        hover:shadow-lg border-2 ${border}`}
-                                        > 
-                                            <button 
-                                                onClick={() => {
-                                                    if (window.confirm(`Are you sure you want to delete the movie: ${movie.title}?`)) {
-                                                        setUserList((prevLists) => prevLists.map((list, i) => 
-                                                            i === index ? { ...list, movies: list.movies.filter((_, j) => j !== movieIndex), } 
-                                                            : list
-                                                            )
-                                                        )
-                                                    }
-                                                }}
-                                                className='absolute py-3 top-2 right-2 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center 
-                                                bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
-                                                aria-label={`Delete ${movie.title}`}
+                                {/* Movie list */}
+                                <DragDropContext
+                                    onDragEnd={(result) => handleDragEnd(result, index)}
+                                >
+                                    <Droppable droppableId={`list-${index}`} type='MOVIES' direction='horizontal' >
+                                        {(provided) => (
+                                            <div
+                                                {...provided.droppableProps}
+                                                ref={provided.innerRef}
+                                                className='mt-6 grid grid-cols-1 sm:grid-cols-2 
+                                                md:grid-cols-3 lg:grid-cols-5 gap-6'
                                             >
-                                                &times;    
-                                            </button>
+                                                {list.movies.map((movie, movieIndex) => {
+                                                    const { background, border, text } = getMedalStyle(movieIndex);
 
+                                                    return (
+                                                        <Draggable draggableId={`movie-${movieIndex}`} index={movieIndex} key={movieIndex}>
                                         
-                                            <h5 className={`absolute top-2 left-2 w-8 h-8 flex items-center justify-center ${background}
-                                            text-xs sm:text-sm md:text-base rounded-full font-bold shadow`}>
-                                                {text}
-                                            </h5>
-                                            
-                                            <h5 className='mt-6 text-lg font-bold text-gray-800 text-center'>
-                                                    {movie.title}
-                                            </h5>
+                                                        {(provided) => (
+                                                            <div
+                                                                ref={provided.innerRef}
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                className={`bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center relative
+                                                                hover:shadow-lg ${border}`}
+                                                            >
+                                                                <button 
+                                                                    onClick={() => {
+                                                                        if (window.confirm(`Are you sure you want to delete the movie: ${movie.title}?`)) {
+                                                                            setUserList((prevLists) => prevLists.map((list, i) => 
+                                                                                i === index ? { ...list, movies: list.movies.filter((_, j) => j !== movieIndex), } 
+                                                                                : list
+                                                                                )
+                                                                            )
+                                                                        }
+                                                                    }}
+                                                                    className='absolute py-2 top-2 right-2 sm:w-4 sm:h-4 md:w-5 md:h-5 flex items-center justify-center 
+                                                                    bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
+                                                                    aria-label={`Delete ${movie.title}`}
+                                                                >
+                                                                    &times;    
+                                                                </button>
 
-                                            <p className='text-sm text-gray-600 mb-4'>
-                                                {movie.release_date}
-                                            </p>
+                                                            
+                                                                <h5 className={`absolute top-2 left-2 w-6 h-6 flex items-center justify-center ${background}
+                                                                text-xs rounded-full font-bold shadow`}>
+                                                                    {text}
+                                                                </h5>
+                                                                
+                                                                <h5 className='mt-4 text-base font-bold text-gray-800 text-center'>
+                                                                        {movie.title}
+                                                                </h5>
 
-                                            <img src={movie.poster_path} alt={movie.title} 
-                                            className='w-32 sm:w-40 md:w-64 h-auto 
-                                            object-contain mb-4 rounded'/>
+                                                                <p className='text-xs text-gray-600 mb-3'>
+                                                                    {movie.release_date}
+                                                                </p>
 
-                                            <p className='text-sm text-gray-600 '>
-                                                {movie.overview}
-                                            </p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                                                <img src={movie.poster_path} alt={movie.title} 
+                                                                className='w-28 sm:w-36 md:w-48 h-auto 
+                                                                object-contain mb-3 rounded'/>
+
+                                                                <p className='text-xs text-gray-600 text-center'>
+                                                                    {movie.overview}
+                                                                </p>
+                                                            </div>
+                                                            )}
+                                                        </Draggable>
+                                                    );
+                                                })}
+                                                {provided.placeholder && (
+                                                    <div style={{pointerEvents: 'none'}}>{provided.placeholder}</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
                         </>
                     )}
                 </div>
