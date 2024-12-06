@@ -24,6 +24,14 @@ function Create() {
 
         return initialState;
     });
+    const [isSmallScreen, setIsSmallScereen] = useState(window.innerWidth <= 640);
+
+    useEffect(() => {
+        const handleResize = () => setIsSmallScereen(window.innerWidth <= 640);
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
     useEffect(() => {
@@ -244,7 +252,7 @@ function Create() {
                                 <DragDropContext
                                     onDragEnd={(result) => handleDragEnd(result, index)}
                                 >
-                                    <Droppable droppableId={`list-${index}`} type='MOVIES' direction='horizontal' >
+                                    <Droppable droppableId={`list-${index}`} type='MOVIES' direction={isSmallScreen ? 'vertical' : 'horizontal'} >
                                         {(provided) => (
                                             <div
                                                 {...provided.droppableProps}
