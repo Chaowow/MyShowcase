@@ -24,6 +24,8 @@ function Create() {
         return initialState;
     });
 
+    const maxChar = 52;
+
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
     useEffect(() => {
         if (debouncedSearchQuery) {
@@ -87,7 +89,7 @@ function Create() {
 
     const getMedalStyle = (movieIndex) => {
         if (movieIndex === 0) {
-            return { background: 'bg-yellow-400', border: 'border-yellow-400 border-4', text: '1st'};
+            return { background: 'bg-yellow-300', border: 'border-yellow-300 border-4', text: '1st'};
         }
         if (movieIndex === 1) {
             return { background: 'bg-gray-400', border: 'border-gray-400 border-4', text: '2nd'};
@@ -123,7 +125,11 @@ function Create() {
                                 <input 
                                     type='text'
                                     value={tempTitle}
-                                    onChange={(e) => setTempTitle(e.target.value)}
+                                    onChange={(e) => {
+                                        if (e.target.value.length <= maxChar) {
+                                            setTempTitle(e.target.value);
+                                        }
+                                    }}
                                     className='border rounded p-2 w-full mb-2'
                                     placeholder='Edit Title'
                                 />
