@@ -25,6 +25,8 @@ function Create() {
         return initialState;
     });
     const [isSmallScreen, setIsSmallScereen] = useState(window.innerWidth <= 640);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         const handleResize = () => setIsSmallScereen(window.innerWidth <= 640);
@@ -34,6 +36,7 @@ function Create() {
     }, []);
     
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    
     useEffect(() => {
         if (debouncedSearchQuery) {
             fetchMovies(debouncedSearchQuery);
@@ -41,6 +44,12 @@ function Create() {
             setSearchResults(null);
         }
     }, [debouncedSearchQuery]);
+
+    useEffect(() => {
+        if (searchQuery) {
+            fetchMovies(searchQuery, currentPage);
+        }
+    }, [searchQuery, currentPage]);
 
     const maxChar = 52;
 
@@ -71,16 +80,18 @@ function Create() {
         );
     };
     
-    const fetchMovies = async (query) => {
+    const fetchMovies = async (query, page = 1) => {
         const apiKey = import.meta.env.VITE_TMDB_API_KEY;
         try {
             const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
                 params: {
                     api_key: apiKey,
-                    query: query
+                    query: query,
+                    page: page
                 },
             });
             setSearchResults(response.data.results);
+            setTotalPages(response.data.total_pages);
         } catch (err) {
             console.error('Error fetching data:', err);
         }
@@ -339,7 +350,7 @@ function Create() {
         />
 
         {/*  Search Results */}
-        <SearchResults searchResults={searchResult} onOpenModal={openModal} />
+        <SearchResults searchResults={searchResult} onOpenModal={openModal} currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage}/>
         
         <Modal isOpen={isModalOpen} onClose={closeModal}>
             <h3 className='text-xl font-semibold mb-4'>Select a List</h3>

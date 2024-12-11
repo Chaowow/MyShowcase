@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SearchResults({ searchResults, onOpenModal }) {
+function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, setCurrentPage }) {
   return (
     <div>
         {searchResults ? (
@@ -50,6 +50,23 @@ function SearchResults({ searchResults, onOpenModal }) {
                         ))}
                     </div>
                 )}
+                <div className='flex justify-center items-center mt-4'>
+                    <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 text-white'}`}
+                    >
+                        Previous
+                    </button>
+                    <span className='text-white mx-6'>{`Page ${currentPage} of ${totalPages}`}</span>
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev + 1, 1))}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 text-white'}`}
+                        >
+                            Next
+                        </button>
+                </div>
             </>
         ) : null}
     </div>
