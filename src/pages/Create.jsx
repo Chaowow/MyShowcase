@@ -27,6 +27,7 @@ function Create() {
     const [isSmallScreen, setIsSmallScereen] = useState(window.innerWidth <= 640);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isButtonVisible, setIsButtonVisible] = useState(false);
 
     useEffect(() => {
         const handleResize = () => setIsSmallScereen(window.innerWidth <= 640);
@@ -50,6 +51,22 @@ function Create() {
             fetchMovies(searchQuery, currentPage);
         }
     }, [searchQuery, currentPage]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 200) {
+                setIsButtonVisible(true);
+            } else { 
+                setIsButtonVisible(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll); 
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
 
     const maxChar = 52;
 
@@ -352,6 +369,15 @@ function Create() {
         {/*  Search Results */}
         <SearchResults searchResults={searchResult} onOpenModal={openModal} currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage}/>
         
+        {isButtonVisible && (
+            <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+                className='fixed bottom-4 right-4 bg-indigo-500 text-white px-4 py-2 rounded shadow-md'
+            >
+                Scroll-to-Top
+            </button>
+        )}
+
         <Modal isOpen={isModalOpen} onClose={closeModal}>
             <h3 className='text-xl font-semibold mb-4'>Select a List</h3>
             <ul>
@@ -377,8 +403,6 @@ function Create() {
                 ))}
             </ul>
         </Modal>
-
-        
     </div>
   );
 }
