@@ -98,11 +98,9 @@ function Create() {
     };
     
     const fetchMovies = async (query, page = 1) => {
-        const apiKey = import.meta.env.VITE_TMDB_API_KEY;
         try {
-            const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
+            const response = await axios.get('http://localhost:5000/api/tmdb', {
                 params: {
-                    api_key: apiKey,
                     query: query,
                     page: page
                 },
