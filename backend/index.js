@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/tmdb', async (req, res) => {
-    const { query, page = 1 } = req.query; // Extract 'query' and 'page' from request
-    const API_KEY = process.env.TMDB_API_KEY;
+    const { query, page = 1 } = req.query; 
+    const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
     if (!query) {
         return res.status(400).json({ error: 'Query parameter is required.'});
@@ -28,7 +28,7 @@ app.get('/api/tmdb', async (req, res) => {
         // Call TMDb API
         const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
             params: {
-                api_key: API_KEY,
+                api_key: TMDB_API_KEY,
                 query,
                 page
             }
@@ -38,6 +38,35 @@ app.get('/api/tmdb', async (req, res) => {
     } catch (error) {
         console.error('Error fetching data from TMDb:', error.message);
         res.status(500).json({ error: 'An error occured while fetching data from TMDb.' });
+    }
+});
+
+app.get('/api/books', async (req, res) => {
+    const { query, startIndex = '0', maxResults = '10' } = req.query;
+    const  GBOOKS_API_KEY = process.env.GBOOKS_API_KEY;
+
+    const sIndex = parseInt(startIndex, 10);
+    const mResults = parseInt(maxResults, 10);
+
+    if (!query) {
+        return res.status(400).json({ error: 'Query parameter is required.'});
+    }
+
+    try {
+        // Call Google Books API
+        const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
+            params: {
+                q: query,
+                startIndex: sIndex,
+                maxResults: mResults,
+                key: GBOOKS_API_KEY
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching data from Google Books:', error.message);
+        res.status(500).json({ error: 'An error occured while fetching data from Google Books'});
     }
 });
 
