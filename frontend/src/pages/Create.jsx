@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Form from '../components/Form';
 import SearchResults from '../components/SearchResults';
@@ -28,6 +28,7 @@ function Create() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isButtonVisible, setIsButtonVisible] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState('movies');
 
     useEffect(() => {
         const handleResize = () => setIsSmallScereen(window.innerWidth <= 640);
@@ -35,22 +36,6 @@ function Create() {
 
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
-    
-    useEffect(() => {
-        if (debouncedSearchQuery) {
-            fetchMovies(debouncedSearchQuery);
-        } else {
-            setSearchResults(null);
-        }
-    }, [debouncedSearchQuery]);
-
-    useEffect(() => {
-        if (searchQuery) {
-            fetchMovies(searchQuery, currentPage);
-        }
-    }, [searchQuery, currentPage]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -67,6 +52,41 @@ function Create() {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
+    
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+    const fetchResults = useCallback(
+        async (query, paginationKey = 1) => {
+            if (selectedCategory === 'movies') {
+                const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey } });
+                setSearchResults(response.data.results);
+                setTotalPages(response.data.total_pages);
+            
+            } else if (selectedCategory === 'books') {
+                const response = await axios.get('http://localhost:5000/api/books', { params: { query, startIndex: (paginationKey - 1) * 10, maxResults: 10 } });
+                setSearchResults(response.data.items || []);
+
+                const totalItems = response.data.totalItems || 0;
+                setTotalPages(Math.ceil(totalItems / 10));
+            }
+        },
+    
+        [selectedCategory]
+    );
+    
+    useEffect(() => {
+        if (debouncedSearchQuery) {
+            fetchResults(debouncedSearchQuery);
+        } else {
+            setSearchResults(null);
+        }
+    }, [debouncedSearchQuery, fetchResults]);
+
+    useEffect(() => {
+        if (searchQuery) {
+            fetchResults(searchQuery, currentPage);
+        }
+    }, [searchQuery, currentPage, fetchResults]);
 
     const maxChar = 52;
 
@@ -95,21 +115,6 @@ function Create() {
                     : list
             )
         );
-    };
-    
-    const fetchMovies = async (query, page = 1) => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/tmdb', {
-                params: {
-                    query: query,
-                    page: page
-                },
-            });
-            setSearchResults(response.data.results);
-            setTotalPages(response.data.total_pages);
-        } catch (err) {
-            console.error('Error fetching data:', err);
-        }
     };
 
     const openModal = (movie) => {
@@ -355,8 +360,33 @@ function Create() {
                 </div>
             ))}
         </div>
-         {/* Search Input */}
-         <input 
+
+        <div className='flex space-x-4 mb-4'>
+            <button
+                onClick={() => setSelectedCategory('movies')}
+                className={`px-4 py-2 rounded
+                    ${selectedCategory === 'movies'
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-indigo-200 text-indigo-600 border border-indigo-500'}
+                    `}
+            >
+                Movies
+            </button>
+
+            <button
+                onClick={() => setSelectedCategory('books')}
+                className={`px-4 py-2 rounded
+                    ${selectedCategory === 'books'
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-indigo-200 text-indigo-600 border border-indigo-500'}
+                    `}
+            >
+                Books
+            </button>
+        </div>
+
+        {/* Search Input */}
+        <input 
             type='text'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -365,7 +395,14 @@ function Create() {
         />
 
         {/*  Search Results */}
-        <SearchResults searchResults={searchResult} onOpenModal={openModal} currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage}/>
+        <SearchResults 
+            searchResults={searchResult} 
+            onOpenModal={openModal} 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            setCurrentPage={setCurrentPage}
+            selectedCategory={selectedCategory}
+        />
         
         {isButtonVisible && (
             <button 
