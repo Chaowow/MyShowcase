@@ -46,7 +46,7 @@ app.get('/api/tmdb', async (req, res) => {
 });
 
 app.get('/api/books', async (req, res) => {
-    const { query, startIndex = '0', maxResults = '10' } = req.query;
+    const { query, startIndex = '0', maxResults = '8' } = req.query;
     const  GBOOKS_API_KEY = process.env.GBOOKS_API_KEY;
 
     const sIndex = parseInt(startIndex, 10);
