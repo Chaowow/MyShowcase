@@ -15,6 +15,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                   
                       return (
                         <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+
                           {/* Poster */}
                           {item.poster_path && (
                             <img
@@ -23,16 +24,19 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                               className="w-32 sm:w-40 md:w-64 h-auto mb-2 rounded"
                             />
                           )}
+
                           {/* Title */}
                           <h4 className="text-xl font-semibold text-slate-100">
                             {item.title}
                           </h4>
+
                           {/* Release Year */}
                           <h5 className="text-sm text-slate-300 mb-2">
                             {item.release_date
                               ? new Date(item.release_date).getFullYear()
                               : 'Year not available'}
                           </h5>
+
                           {/* Overview */}
                           <p className="text-sm text-slate-400 flex-1">
                             {item.overview}
@@ -49,6 +53,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
         
                       return (
                         <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+
                           {/* Book Cover */}
                           {item.volumeInfo?.imageLinks?.thumbnail && (
                             <img
@@ -57,19 +62,54 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                               className="w-32 sm:w-40 md:w-64 h-auto mb-2 rounded"
                             />
                           )}
+
                           {/* Title */}
                           <h4 className="text-xl font-semibold text-slate-100">
                             {item.volumeInfo?.title}
                           </h4>
+
                           {/* Authors */}
                           <p className="text-sm text-slate-300 mb-2">
                             {item.volumeInfo?.authors
                               ? item.volumeInfo.authors.join(', ')
                               : 'Author not available'}
                           </p>
+
                           {/* Description */}
                           <p className="text-sm text-slate-400 flex-1">
                             {item.volumeInfo?.description || 'No description'}
+                          </p>
+                        </div>
+                      );
+                    } else if (selectedCategory === 'tvShows') {
+
+                      return (
+                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+
+                          {/* Tv Show Cover */}
+                          {item.poster_path && (
+                            <img 
+                              src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                              alt={item.name}
+                              className="w-32 sm:w-40 md:w-64 h-auto mb-2 rounded"
+                              />
+                          )}
+
+                          {/* Title */}
+                          <h4 className="text-xl font-semibold text-slate-100">
+                            {item.name}
+                          </h4>
+
+                          {/* Air Date */}
+                          <h5 className="text-sm text-slate-300 mb-2">
+                            {item.first_air_date
+                              ? new Date(item.first_air_date).getFullYear()
+                              : 'Year not available'}
+                          </h5>
+
+                          {/* Overview */}
+                          <p className="text-sm text-slate-400 flex-1">
+                            {item.overview}
                           </p>
                         </div>
                       );

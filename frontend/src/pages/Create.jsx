@@ -58,7 +58,7 @@ function Create() {
     const fetchResults = useCallback(
         async (query, paginationKey = 1) => {
             if (selectedCategory === 'movies') {
-                const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey } });
+                const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey, type: 'movie' } });
                 setSearchResults(response.data.results);
                 setTotalPages(response.data.total_pages);
             
@@ -68,6 +68,10 @@ function Create() {
 
                 const totalItems = response.data.totalItems || 0;
                 setTotalPages(Math.ceil(totalItems / 10));
+            } else if (selectedCategory === 'tvShows') {
+                const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey, type: 'tv' } });
+                setSearchResults(response.data.results);
+                setTotalPages(response.data.total_pages);
             }
         },
     
@@ -91,6 +95,13 @@ function Create() {
     const maxChar = 52;
 
     const openForm = () => setOpen(!open);
+
+    const categories = [
+        { id: 'movies', label: 'Movies'},
+        { id: 'tvShows', label: 'Tv Shows'},
+        { id: 'books', label: 'Books'},
+        { id: 'videoGames', label: 'Video Games'}
+    ];
 
     const saveList = (list) => {
         setUserList([...userList, { ...list, movies: [] }]);
@@ -361,28 +372,21 @@ function Create() {
             ))}
         </div>
 
+        {/* Search Input Tabs */}
         <div className='flex space-x-4 mb-4'>
-            <button
-                onClick={() => setSelectedCategory('movies')}
-                className={`px-4 py-2 rounded
-                    ${selectedCategory === 'movies'
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-indigo-200 text-indigo-600 border border-indigo-500'}
-                    `}
-            >
-                Movies
-            </button>
-
-            <button
-                onClick={() => setSelectedCategory('books')}
-                className={`px-4 py-2 rounded
-                    ${selectedCategory === 'books'
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-indigo-200 text-indigo-600 border border-indigo-500'}
-                    `}
-            >
-                Books
-            </button>
+            {categories.map((category) => (
+                <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`px-4 py-2 rounded
+                        ${selectedCategory === category.id
+                            ? 'bg-indigo-500 text-white'
+                            : 'bg-indigo-200 text-indigo-600 border border-indigo-500'
+                    }`}
+                >
+                    {category.label}
+                </button>
+            ))}
         </div>
 
         {/* Search Input */}

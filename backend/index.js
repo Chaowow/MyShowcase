@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/tmdb', async (req, res) => {
-    const { query, page = 1 } = req.query; 
+    const { query, page = 1, type = 'movie' } = req.query; 
     const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
     if (!query) {
@@ -26,7 +26,11 @@ app.get('/api/tmdb', async (req, res) => {
 
     try {
         // Call TMDb API
-        const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
+        const endpoint = type === 'tv'
+        ? 'https://api.themoviedb.org/3/search/tv'
+        : 'https://api.themoviedb.org/3/search/movie';
+
+        const response = await axios.get(endpoint, {
             params: {
                 api_key: TMDB_API_KEY,
                 query,
