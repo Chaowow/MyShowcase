@@ -113,6 +113,35 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                           </p>
                         </div>
                       );
+                    } else if (selectedCategory === 'videoGames') {
+
+                      return (
+                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+
+                          {/* Video Game Image */}
+                          {item.background_image && (
+                            <img 
+                              src={`${item.background_image}`}
+                              alt={`${item.name} cover`}
+                              className="w-32 sm:w-40 md:w-64 h-auto mb-2 rounded"
+                              />
+                          )}
+
+                          {/* Name */}
+                          <h4 className="text-xl font-semibold text-slate-100">
+                            {item.name}
+                          </h4>
+
+                          {/* Release Date */}
+                          <h5 className="text-sm text-slate-300 mb-2">
+                            {item.released
+                              ? new Date(item.released).getFullYear()
+                              : 'Year not available'}
+                          </h5>
+
+    
+                        </div>
+                      );
                     }
                 
                     return null;

@@ -74,6 +74,26 @@ app.get('/api/books', async (req, res) => {
     }
 });
 
+app.get('/api/rawg', async (req, res) => {
+    const { query, page = 1, page_size = 8 } = req.query;
+
+    try {
+        const response = await axios.get('https://api.rawg.io/api/games', {
+            params: {
+                key: process.env.RAWG_API_KEY,
+                search: query,
+                page,
+                page_size
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching data from Google Books:', error.message);
+        res.status(500).json({ error: 'An error occured while fetching data from RAWG'});
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

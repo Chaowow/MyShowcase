@@ -63,17 +63,22 @@ function Create() {
                 setTotalPages(response.data.total_pages);
             
             } else if (selectedCategory === 'books') {
-                const response = await axios.get('http://localhost:5000/api/books', { params: { query, startIndex: (paginationKey - 1) * 10, maxResults: 8 } });
+                const response = await axios.get('http://localhost:5000/api/books', { params: { query, startIndex: (paginationKey - 1) * 8, maxResults: 8 } });
                 setSearchResults(response.data.items || []);
 
                 if (paginationKey === 1) {
                     const totalItems = response.data.totalItems || 0;
-                    setTotalPages(Math.ceil(totalItems / 10));
+                    setTotalPages(Math.ceil(totalItems / 8));
                 }
             } else if (selectedCategory === 'tvShows') {
                 const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey, type: 'tv' } });
                 setSearchResults(response.data.results);
                 setTotalPages(response.data.total_pages);
+            } else if (selectedCategory === 'videoGames') {
+                const response = await axios.get('http://localhost:5000/api/rawg', { params: { query, page: paginationKey, page_size: 8 } });
+
+                setSearchResults(response.data.results);
+                setTotalPages(response.data.count);
             }
         },
     
