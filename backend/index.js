@@ -2,12 +2,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const axios = require('axios');
 const cors = require('cors');
+const NodeCache = require('node-cache');
 const apiCaller = require('./utils/apiCaller');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT|| 5000;
+const cache = new NodeCache({ stdTTL: 300, checkperiod: 320 });
 
 app.use(cors());
 app.use(express.json());
@@ -16,8 +18,37 @@ app.get('/', (req, res) => {
     res.send('Backend server is running!');
 });
 
+const cacheMiddleware = (req, res, next) => {
+    const { query, page = 1, startIndex, type } = req.query;
 
-app.get('/api/tmdb', async (req, res) => {
+    let key;
+    if (req.path === '/api/books') {
+        const startIdx = startIndex || 0;
+        key = `${req.path}?query=${query}&startIndex=${startIdx}`;
+    } else if (req.path === '/api/tmdb') {
+        key = `${req.path}?query=${query}&page=${page}&type=${type}`;
+    } else {
+        key = `${req.path}?query=${query}&page=${page}`;
+    }
+
+    const cachedData = cache.get(key);
+
+    if (cachedData) {
+        console.log(`Cache hit for ${key}`);
+        return res.json(cachedData);
+    }
+
+    console.log(`Cache miss for ${key}`);
+    res.sendResponse = res.json;
+    res.json = (body) => {
+        cache.set(key, body);
+        res.sendResponse(body);
+    };
+
+    next();
+}
+
+app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
     const { query, page = 1, type = 'movie' } = req.query; 
     const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
@@ -43,8 +74,8 @@ app.get('/api/tmdb', async (req, res) => {
     }
 });
 
-app.get('/api/books', async (req, res) => {
-    const { query, startIndex = '0', maxResults = '8' } = req.query;
+app.get('/api/books', cacheMiddleware, async (req, res) => {
+    const { query, startIndex = '0', maxResults = '20' } = req.query;
     const  GBOOKS_API_KEY = process.env.GBOOKS_API_KEY;
 
     if (!query) {
@@ -66,12 +97,12 @@ app.get('/api/books', async (req, res) => {
     }
 });
 
-app.get('/api/rawg', async (req, res) => {
-    const { query, page = 1, page_size = 8 } = req.query;
+app.get('/api/rawg', cacheMiddleware, async (req, res) => {
+    const { query, page = 1, page_size = 20 } = req.query;
     const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
     if (!query) {
-        return res.status(400).json({ error: 'Query parameter is require.' });
+        return res.status(400).json({ error: 'Query parameter is required.' });
     }
 
     const params = {

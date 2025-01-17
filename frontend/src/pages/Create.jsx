@@ -57,28 +57,55 @@ function Create() {
 
     const fetchResults = useCallback(
         async (query, paginationKey = 1) => {
-            if (selectedCategory === 'movies') {
-                const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey, type: 'movie' } });
-                setSearchResults(response.data.results);
-                setTotalPages(response.data.total_pages);
-            
-            } else if (selectedCategory === 'books') {
-                const response = await axios.get('http://localhost:5000/api/books', { params: { query, startIndex: (paginationKey - 1) * 8, maxResults: 8 } });
-                setSearchResults(response.data.items || []);
-
-                if (paginationKey === 1) {
-                    const totalItems = response.data.totalItems || 0;
-                    setTotalPages(Math.ceil(totalItems / 8));
+            const categoryConfig = {
+                movies: {
+                    url: 'http://localhost:5000/api/tmdb',
+                    params: { query, page: paginationKey, type: 'movie' },
+                    processResponse: (data) => ({
+                        results: data.results,
+                        totalPages: data.total_pages
+                    })
+                },
+                tvShows: {
+                    url: 'http://localhost:5000/api/tmdb',
+                    params: { query, page: paginationKey, type: 'tv' },
+                    processResponse: (data) => ({
+                        results: data.results,
+                        totalPages: data.total_pages
+                    })
+                },
+                books: {
+                    url: 'http://localhost:5000/api/books',
+                    params: { query, startIndex: (paginationKey - 1) * 20, maxResults: 20 },
+                    processResponse: (data) => {
+                        const totalItems = data.totalItems || 0;
+                        return {
+                            results: data.items || [],
+                            totalPages: Math.ceil(totalItems / 20)
+                        };
+                    }
+                },
+                videoGames: {
+                    url: 'http://localhost:5000/api/rawg',
+                    params: { query, page: paginationKey, page_size: 20 },
+                    processResponse: (data) => ({
+                        results: data.results,
+                        totalPages: Math.ceil(data.count / 20)
+                    })
                 }
-            } else if (selectedCategory === 'tvShows') {
-                const response = await axios.get('http://localhost:5000/api/tmdb', { params: { query, page: paginationKey, type: 'tv' } });
-                setSearchResults(response.data.results);
-                setTotalPages(response.data.total_pages);
-            } else if (selectedCategory === 'videoGames') {
-                const response = await axios.get('http://localhost:5000/api/rawg', { params: { query, page: paginationKey, page_size: 8 } });
+            };
 
-                setSearchResults(response.data.results);
-                setTotalPages(response.data.count);
+            const config = categoryConfig[selectedCategory];
+            if (!config) return;
+
+            try {
+                const response = await axios.get(config.url, { params: config.params });
+                const { results, totalPages } = config.processResponse(response.data);
+
+                setSearchResults(results);
+                setTotalPages(totalPages);
+            } catch (error) {
+                console.error('Error fetching results', error.message);
             }
         },
     
