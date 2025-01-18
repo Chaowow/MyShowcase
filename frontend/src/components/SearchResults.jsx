@@ -123,7 +123,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                             <img 
                               src={`${item.background_image}`}
                               alt={`${item.name} cover`}
-                              className="sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-72 lg:h-80 object-contain mb-4 rounded"
+                              className="sm:w-48 md:w-64 lg:w-full h-48 sm:h-64 md:h-72 lg:h-80 object-contain mb-4 rounded"
                               />
                           )}
 
@@ -138,8 +138,13 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                               ? new Date(item.released).getFullYear()
                               : 'Year not available'}
                           </h5>
-
-    
+                          
+                          {/* Platforms */}
+                          {item.platforms && item.platforms.length > 0 && (
+                            <p className='text-slate-300'>
+                              {item.platforms.join(', ')}
+                            </p>
+                          )}
                         </div>
                       );
                     }

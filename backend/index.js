@@ -114,7 +114,16 @@ app.get('/api/rawg', cacheMiddleware, async (req, res) => {
 
     try {
         const data = await apiCaller('https://api.rawg.io/api/games', params);
-        res.json(data);
+
+        const formattedResults = data.results.map((game) => ({
+            id: game.id,
+            name: game.name,
+            released: game.released,
+            background_image: game.background_image,
+            platforms: game.platforms.map((p) => p.platform.name)
+        }));
+
+        res.json({ results: formattedResults });
     } catch (error) {
         res.status(500).json({ error: 'An error occured while fetching data from RAWG'});
     }
