@@ -433,6 +433,7 @@ function Create() {
         />
 
         {/*  Search Results */}
+        
         <SearchResults 
             searchResults={searchResult} 
             onOpenModal={openModal} 

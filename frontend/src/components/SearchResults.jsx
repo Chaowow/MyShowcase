@@ -59,7 +59,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                             <img
                               src={item.volumeInfo.imageLinks.thumbnail}
                               alt={item.volumeInfo.title}
-                              className="w-32 sm:w-40 md:w-64 h-auto mb-2 rounded"
+                              className="w-40 sm:w-60 object-cover mb-2 rounded"
                             />
                           )}
 
@@ -76,7 +76,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                           </p>
 
                           {/* Description */}
-                          <p className="text-sm text-slate-400 flex-1">
+                          <p className="text-sm text-slate-400 flex-1 line-clamp-6">
                             {item.volumeInfo?.description || 'No description'}
                           </p>
                         </div>
@@ -123,7 +123,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                             <img 
                               src={`${item.background_image}`}
                               alt={`${item.name} cover`}
-                              className="w-32 sm:w-40 md:w-64 h-auto mb-2 rounded"
+                              className="sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-72 lg:h-80 object-contain mb-4 rounded"
                               />
                           )}
 
