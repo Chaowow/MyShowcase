@@ -111,6 +111,13 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                           <p className="text-sm text-slate-400 flex-1">
                             {item.overview}
                           </p>
+
+                          <button
+                            onClick={() => onOpenModal(item)}
+                            className='bg-indigo-500 px-4 py-2 rounded text-white hover:bg-indigo-600 mt-4 w-full'
+                          >
+                            Add to List
+                          </button>
                         </div>
                       );
                     } else if (selectedCategory === 'videoGames') {

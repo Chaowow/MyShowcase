@@ -12,7 +12,7 @@ function Create() {
     const [searchResult, setSearchResults] = useState(null);
     const [userList, setUserList] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedMovie, setSelectedMovie] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [tempTitle, setTempTitle] = useState('');
     const [tempDescription, setTempDescription] = useState('');
@@ -138,38 +138,40 @@ function Create() {
     ];
 
     const saveList = (list) => {
-        setUserList([...userList, { ...list, movies: [] }]);
+        setUserList([...userList, { ...list, items: [] }]);
     };
 
-    const addMovieToList = (listTitle, movie) => {
-        const movieToAdd = {
-            title: movie.title || 'Unknown Title',
-            release_date: movie.release_date
-                ? new Date(movie.release_date).getFullYear()
+    const addItemToList = (listTitle, item) => {
+        const itemToAdd = {
+            title: item.title || item.name || 'Unknown Title',
+            release_date: item.release_date
+                ? new Date(item.release_date).getFullYear()
+                : item.first_air_date
+                ? new Date(item.first_air_date).getFullYear()
                 : 'Year not available',
-            overview: movie.overview || 'No description available.',
-            poster_path: movie.poster_path
-                ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+            overview: item.overview || 'No description available.',
+            poster_path: item.poster_path
+                ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
                 : 'https://via.placeholder.com/300x450?text=No+Image',
         };
     
         setUserList((prevLists) =>
             prevLists.map((list) =>
                 list.title === listTitle
-                    ? { ...list, movies: [...list.movies, movieToAdd] }
+                    ? { ...list, items: [...list.items, itemToAdd] }
                     : list
             )
         );
     };
 
     const openModal = (movie) => {
-        setSelectedMovie(movie);
+        setSelectedItem(movie);
         setIsModalOpen(true);
     }
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setSelectedMovie(null);
+        setSelectedItem(null);
     }
 
     const getMedalStyle = (movieIndex) => {
@@ -336,11 +338,11 @@ function Create() {
                                                 className='mt-6 grid grid-cols-1 sm:grid-cols-2 
                                                 md:grid-cols-3 lg:grid-cols-5 gap-6'
                                             >
-                                                {list.movies.map((movie, movieIndex) => {
-                                                    const { background, border, text } = getMedalStyle(movieIndex);
+                                                {list.items.map((item, itemIndex) => {
+                                                    const { background, border, text } = getMedalStyle(itemIndex);
 
                                                     return (
-                                                        <Draggable draggableId={`movie-${movieIndex}`} index={movieIndex} key={movieIndex}>
+                                                        <Draggable draggableId={`item-${itemIndex}`} index={itemIndex} key={itemIndex}>
                                         
                                                         {(provided) => (
                                                             <div
@@ -352,17 +354,17 @@ function Create() {
                                                             >
                                                                 <button 
                                                                     onClick={() => {
-                                                                        if (window.confirm(`Are you sure you want to delete the movie: ${movie.title}?`)) {
+                                                                        if (window.confirm(`Are you sure you want to delete the movie: ${item.title}?`)) {
                                                                             setUserList((prevLists) => prevLists.map((list, i) => 
-                                                                                i === index ? { ...list, movies: list.movies.filter((_, j) => j !== movieIndex), } 
+                                                                                i === index ? { ...list, items: list.items.filter((_, j) => j !== itemIndex), } 
                                                                                 : list
                                                                                 )
-                                                                            )
+                                                                            );
                                                                         }
                                                                     }}
                                                                     className='absolute py-2 top-2 right-2 sm:w-4 sm:h-4 md:w-5 md:h-5 flex items-center justify-center 
                                                                     bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
-                                                                    aria-label={`Delete ${movie.title}`}
+                                                                    aria-label={`Delete ${item.title}`}
                                                                 >
                                                                     &times;    
                                                                 </button>
@@ -374,19 +376,19 @@ function Create() {
                                                                 </h5>
                                                                 
                                                                 <h5 className='mt-4 text-base font-bold text-gray-800 text-center'>
-                                                                        {movie.title}
+                                                                        {item.title}
                                                                 </h5>
 
                                                                 <p className='text-xs text-gray-600 mb-3'>
-                                                                    {movie.release_date}
+                                                                    {item.release_date}
                                                                 </p>
 
-                                                                <img src={movie.poster_path} alt={movie.title} 
+                                                                <img src={item.poster_path} alt={item.title} 
                                                                 className='w-28 sm:w-36 md:w-48 h-auto 
                                                                 object-contain mb-3 rounded'/>
 
                                                                 <p className='text-xs text-gray-600 text-center'>
-                                                                    {movie.overview}
+                                                                    {item.overview}
                                                                 </p>
                                                             </div>
                                                             )}
@@ -465,7 +467,7 @@ function Create() {
 
                         <button 
                             onClick={() => {
-                                addMovieToList(list.title, selectedMovie);
+                                addItemToList(list.title, selectedItem);
                                 closeModal();
                             }}
                             className='bg-indigo-500 text-white px-3 py-1 rounded
