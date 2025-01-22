@@ -198,11 +198,11 @@ function Create() {
             prevLists.map((list, i) => {
                 if (i !== listIndex) return list;
 
-                const updatedMovies = Array.from(list.movies);
-                const [movedMovie] = updatedMovies.splice(sourceIndex, 1);
-                updatedMovies.splice(destinationIndex, 0, movedMovie);
+                const updatedItems = Array.from(list.items);
+                const [movedItem] = updatedItems.splice(sourceIndex, 1);
+                updatedItems.splice(destinationIndex, 0, movedItem);
 
-                return { ...list, movies: updatedMovies};
+                return { ...list, items: updatedItems};
             })
         );
     };
@@ -330,7 +330,7 @@ function Create() {
                                 <DragDropContext
                                     onDragEnd={(result) => handleDragEnd(result, index)}
                                 >
-                                    <Droppable droppableId={`list-${index}`} type='MOVIES' direction={isSmallScreen ? 'vertical' : 'horizontal'} >
+                                    <Droppable droppableId={`list-${index}`} type='ITEMS' direction={isSmallScreen ? 'vertical' : 'horizontal'} >
                                         {(provided) => (
                                             <div
                                                 {...provided.droppableProps}
