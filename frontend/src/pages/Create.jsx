@@ -142,17 +142,23 @@ function Create() {
     };
 
     const addItemToList = (listTitle, item) => {
+        const isBook = !!item.volumeInfo;
+
         const itemToAdd = {
-            title: item.title || item.name || 'Unknown Title',
+            title: item.title || item.name || item.volumeInfo?.title || 'Unknown Title',
             release_date: item.release_date
                 ? new Date(item.release_date).getFullYear()
                 : item.first_air_date
                 ? new Date(item.first_air_date).getFullYear()
-                : 'Year not available',
-            overview: item.overview || 'No description available.',
+                : item.volumeInfo?.publishedDate
+                ? new Date(item.volumeInfo.publishedDate).getFullYear()
+                : 'No year available',
+            description: isBook
+                ? item.volumeInfo?.authors?.join(', ') || 'Author not available'
+                : item.overview || 'No description available.',
             poster_path: item.poster_path
                 ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
-                : 'https://via.placeholder.com/300x450?text=No+Image',
+                : item.volumeInfo?.imageLinks?.thumbnail || 'https://via.placeholder.com/300x450?text=No+Image',
         };
     
         setUserList((prevLists) =>
@@ -376,7 +382,7 @@ function Create() {
                                                                 </h5>
                                                                 
                                                                 <h5 className='mt-4 text-base font-bold text-gray-800 text-center'>
-                                                                        {item.title}
+                                                                    {item.title}
                                                                 </h5>
 
                                                                 <p className='text-xs text-gray-600 mb-3'>
@@ -388,7 +394,7 @@ function Create() {
                                                                 object-contain mb-3 rounded'/>
 
                                                                 <p className='text-xs text-gray-600 text-center'>
-                                                                    {item.overview}
+                                                                    {item.description}
                                                                 </p>
                                                             </div>
                                                             )}
