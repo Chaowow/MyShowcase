@@ -143,6 +143,7 @@ function Create() {
 
     const addItemToList = (listTitle, item) => {
         const isBook = !!item.volumeInfo;
+        const isVideoGame = !!item.background_image;
 
         const itemToAdd = {
             title: item.title || item.name || item.volumeInfo?.title || 'Unknown Title',
@@ -152,13 +153,21 @@ function Create() {
                 ? new Date(item.first_air_date).getFullYear()
                 : item.volumeInfo?.publishedDate
                 ? new Date(item.volumeInfo.publishedDate).getFullYear()
+                : item.released
+                ? new Date(item.released).getFullYear()
                 : 'No year available',
             description: isBook
                 ? item.volumeInfo?.authors?.join(', ') || 'Author not available'
+                : isVideoGame
+                ? Array.isArray(item.platforms)
+                    ? item.platforms.join(', ')
+                    : 'Platforms not available'
                 : item.overview || 'No description available.',
             poster_path: item.poster_path
                 ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
-                : item.volumeInfo?.imageLinks?.thumbnail || 'https://via.placeholder.com/300x450?text=No+Image',
+                : item.volumeInfo?.imageLinks?.thumbnail 
+                || item.background_image
+                || 'https://via.placeholder.com/300x450?text=No+Image',
         };
     
         setUserList((prevLists) =>

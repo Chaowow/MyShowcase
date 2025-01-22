@@ -159,6 +159,13 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                               {item.platforms.join(', ')}
                             </p>
                           )}
+
+                          <button
+                            onClick={() => onOpenModal(item)}
+                            className='bg-indigo-500 px-4 py-2 rounded text-white hover:bg-indigo-600 mt-4 w-full'
+                          >
+                            Add to List
+                          </button>
                         </div>
                       );
                     }
