@@ -76,7 +76,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                           </p>
 
                           {/* Description */}
-                          <p className="text-sm text-slate-400 flex-1 line-clamp-6">
+                          <p className="text-xs text-slate-400 flex-1 line-clamp-6">
                             {item.volumeInfo?.description || 'No description'}
                           </p>
 
@@ -174,6 +174,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                   })}
                 </div>
               )}
+              
               {/* Pagination */}
               <div className='flex justify-center items-center mt-4'>
                 <button

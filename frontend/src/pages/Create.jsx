@@ -7,16 +7,17 @@ import Modal from '../components/Modal';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function Create() {
-    const [open, setOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResult, setSearchResults] = useState(null);
-    const [userList, setUserList] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [tempTitle, setTempTitle] = useState('');
-    const [tempDescription, setTempDescription] = useState('');
+    const [open, setOpen] = useState(false); // Controls whether the create list form is opem
+    const [searchQuery, setSearchQuery] = useState(''); // Holds the current search query input
+    const [searchResult, setSearchResults] = useState(null); // Stores the search results from API calls 
+    const [userList, setUserList] = useState([]); // Stores the user's created lists
+    const [isModalOpen, setIsModalOpen] = useState(false); // Controls the modal visibility
+    const [selectedItem, setSelectedItem] = useState(null); // Holds the item selected from search results
+    const [isEditing, setIsEditing] = useState(false); // Tracks whether a list title/description is being edited
+    const [tempTitle, setTempTitle] = useState(''); // Temporary state for editing list titles
+    const [tempDescription, setTempDescription] = useState(''); //  Temporary state for editing list descriptions
     const [collapsedLists, setCollapsedLists] = useState(() => {
+        // Tracks whether lists are collapsed or expanded
         const initialState = {};
         userList.forEach((_, index) => {
             initialState[index] = false;
@@ -24,12 +25,13 @@ function Create() {
 
         return initialState;
     });
-    const [isSmallScreen, setIsSmallScereen] = useState(window.innerWidth <= 640);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isButtonVisible, setIsButtonVisible] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState('movies');
+    const [isSmallScreen, setIsSmallScereen] = useState(window.innerWidth <= 640); // Tracks if the screen size is small
+    const [currentPage, setCurrentPage] = useState(1); //Tracks the current search result page
+    const [totalPages, setTotalPages] = useState(1); // Tracks the total pages available for the current search
+    const [isButtonVisible, setIsButtonVisible] = useState(false); // Controls visibility of the scroll-to-top button
+    const [selectedCategory, setSelectedCategory] = useState('movies'); // Tracks the currently selected search category 
 
+    // Update screen size on resize 
     useEffect(() => {
         const handleResize = () => setIsSmallScereen(window.innerWidth <= 640);
         window.addEventListener('resize', handleResize);
@@ -37,6 +39,7 @@ function Create() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Show/hide scroll-to-top button based on scroll position
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 200) {
@@ -53,8 +56,9 @@ function Create() {
         };
     }, []);
     
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
+    // Fetch search results based on category and query
     const fetchResults = useCallback(
         async (query, paginationKey = 1) => {
             const categoryConfig = {
@@ -100,18 +104,21 @@ function Create() {
 
             try {
                 const response = await axios.get(config.url, { params: config.params });
-                const { results, totalPages } = config.processResponse(response.data);
+                const { results = [], totalPages = 0 } = config.processResponse(response.data);
 
                 setSearchResults(results);
                 setTotalPages(totalPages);
             } catch (error) {
                 console.error('Error fetching results', error.message);
+                setSearchResults([]); 
+                setTotalPages(0); 
             }
         },
     
         [selectedCategory]
     );
     
+    // Fetch results when the debounced search query changes
     useEffect(() => {
         if (debouncedSearchQuery) {
             fetchResults(debouncedSearchQuery);
@@ -120,6 +127,7 @@ function Create() {
         }
     }, [debouncedSearchQuery, fetchResults]);
 
+    // Fetch results when the current page changes
     useEffect(() => {
         if (searchQuery) {
             fetchResults(searchQuery, currentPage);
@@ -141,6 +149,7 @@ function Create() {
         setUserList([...userList, { ...list, items: [] }]);
     };
 
+    // Add an item (movie, Tv show, books, or video gamne) to a user-created list
     const addItemToList = (listTitle, item) => {
         const isBook = !!item.volumeInfo;
         const isVideoGame = !!item.background_image;
@@ -189,6 +198,7 @@ function Create() {
         setSelectedItem(null);
     }
 
+    // Get styling for medals in the list, may change to better styling/animation
     const getMedalStyle = (movieIndex) => {
         if (movieIndex === 0) {
             return { background: 'bg-yellow-300', border: 'border-yellow-300 border-4', text: '1st'};
@@ -203,6 +213,7 @@ function Create() {
         return { background: 'bg-indigo-200', border: 'border-indigo-200', text: movieIndex + 1 }
     }
 
+    // Updates the order of items in a list after a drag-and-drop action
     const handleDragEnd = (result, listIndex) => {
         if (!result.destination) return;
 
