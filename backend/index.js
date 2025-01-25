@@ -63,15 +63,29 @@ app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
         ? 'https://api.themoviedb.org/3/search/tv'
         : 'https://api.themoviedb.org/3/search/movie';
 
+    const itemsPerPage = 8;
+    const tmdbPage = Math.ceil(page / Math.ceil(20 / itemsPerPage));
+
     const params = {
         api_key: TMDB_API_KEY,
         query,
-        page
+        page: tmdbPage
     };
 
     try {
         const data = await apiCaller(endpoint, params); // Fetch data from TMDb API
-        res.json(data); // Return the fetched data
+
+        const results = data.results || [];
+        const startIndex = ((page - 1) % Math.ceil(20 / itemsPerPage)) * itemsPerPage;
+        const currentItems = results.slice(startIndex, startIndex + itemsPerPage);
+
+        const total_pages = Math.ceil(data.total_results / itemsPerPage);
+
+        // Return the fetched data
+        res.json({
+            results: currentItems,
+            total_pages
+        }); 
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while fetching data from TMDb.' });
     }
@@ -79,7 +93,7 @@ app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
 
 // Endpoint to fetch books from Google Books API
 app.get('/api/books', cacheMiddleware, async (req, res) => {
-    const { query, startIndex = '0', maxResults = '20' } = req.query;
+    const { query, startIndex = '0', maxResults = '8' } = req.query;
     const GBOOKS_API_KEY = process.env.GBOOKS_API_KEY;
 
     if (!query) {
@@ -103,7 +117,7 @@ app.get('/api/books', cacheMiddleware, async (req, res) => {
 
 // Endpoint to fetch video games from RAWG API
 app.get('/api/rawg', cacheMiddleware, async (req, res) => {
-    const { query, page = 1, page_size = 20 } = req.query;
+    const { query, page = 1, page_size = 8 } = req.query;
     const RAWG_API_KEY = process.env.RAWG_API_KEY;
 
     if (!query) {

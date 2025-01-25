@@ -176,7 +176,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
               )}
               
               {/* Pagination */}
-              <div className='flex justify-center items-center mt-4'>
+              <div className='flex justify-center items-center mt-4 space-x-6'>
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
@@ -184,11 +184,11 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                 >
                   Previous
                 </button>
-                <span className='text-white mx-6'>{`Page ${currentPage} of ${totalPages}`}</span>
+                <span className='text-white'>{`Page ${currentPage} of ${totalPages}`}</span>
                 <button
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 text-white'}`}
+                  className={`px-4 py-2 w-24 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-indigo-600 text-white'}`}
                 >
                   Next
                 </button>

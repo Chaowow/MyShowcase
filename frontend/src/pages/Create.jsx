@@ -5,6 +5,7 @@ import SearchResults from '../components/SearchResults';
 import useDebounce from '../hooks/useDebounce';
 import Modal from '../components/Modal';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 function Create() {
     const [open, setOpen] = useState(false); // Controls whether the create list form is opem
@@ -30,6 +31,10 @@ function Create() {
     const [totalPages, setTotalPages] = useState(1); // Tracks the total pages available for the current search
     const [isButtonVisible, setIsButtonVisible] = useState(false); // Controls visibility of the scroll-to-top button
     const [selectedCategory, setSelectedCategory] = useState('movies'); // Tracks the currently selected search category 
+    const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+    const [modalAction, setModalAction] = useState(() => () => {});
+    const [modalMessage, setModalMessage] = useState('');
+
 
     // Update screen size on resize 
     useEffect(() => {
@@ -56,7 +61,7 @@ function Create() {
         };
     }, []);
     
-    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
     // Fetch search results based on category and query
     const fetchResults = useCallback(
@@ -80,21 +85,21 @@ function Create() {
                 },
                 books: {
                     url: 'http://localhost:5000/api/books',
-                    params: { query, startIndex: (paginationKey - 1) * 20, maxResults: 20 },
+                    params: { query, startIndex: (paginationKey - 1) * 8, maxResults: 8 },
                     processResponse: (data) => {
                         const totalItems = data.totalItems || 0;
                         return {
                             results: data.items || [],
-                            totalPages: Math.ceil(totalItems / 20)
+                            totalPages: Math.ceil(totalItems / 8)
                         };
                     }
                 },
                 videoGames: {
                     url: 'http://localhost:5000/api/rawg',
-                    params: { query, page: paginationKey, page_size: 20 },
+                    params: { query, page: paginationKey, page_size: 8 },
                     processResponse: (data) => ({
                         results: data.results,
-                        totalPages: Math.ceil(data.count / 20)
+                        totalPages: Math.ceil(data.count / 8)
                     })
                 }
             };
@@ -171,7 +176,7 @@ function Create() {
                 ? Array.isArray(item.platforms)
                     ? item.platforms.join(', ')
                     : 'Platforms not available'
-                : item.overview || 'No description available.',
+                : null,
             poster_path: item.poster_path
                 ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
                 : item.volumeInfo?.imageLinks?.thumbnail 
@@ -241,6 +246,13 @@ function Create() {
         </button>
 
         <Form open={open} onSave={saveList}/>
+
+        <ConfirmationModal 
+            isOpen={confirmationModalOpen}
+            onClose={() => setConfirmationModalOpen(false)}
+            onConfirm={modalAction}
+            message={modalMessage}
+        />
 
         {/* User List */}
         <div className='mt-8'>
@@ -330,9 +342,12 @@ function Create() {
                                     
                                             <button
                                                 onClick={() => {
-                                                    if (window.confirm(`Are you sure you want to delete the list: ${list.title}?`)) {
-                                                        setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
-                                                    }
+                                                    setModalAction(`Are you sure you want to delete the list: ${list.title}?`);
+                                                    setModalAction(() => () => 
+                                                        setUserList((prevLists) => prevLists.filter((_, i) => i !== index))
+                                                    );
+
+                                                    setConfirmationModalOpen(true);
                                                 }}
                                                 className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-600'
                                             >    
@@ -352,7 +367,7 @@ function Create() {
                                 {list.description}
                             </p>
 
-                                {/* Movie list */}
+                                {/* User list */}
                                 <DragDropContext
                                     onDragEnd={(result) => handleDragEnd(result, index)}
                                 >
@@ -380,13 +395,18 @@ function Create() {
                                                             >
                                                                 <button 
                                                                     onClick={() => {
-                                                                        if (window.confirm(`Are you sure you want to delete the movie: ${item.title}?`)) {
-                                                                            setUserList((prevLists) => prevLists.map((list, i) => 
-                                                                                i === index ? { ...list, items: list.items.filter((_, j) => j !== itemIndex), } 
+                                                                        setModalMessage(`Are you sure you want to delete the item: ${item.title}?`);
+                                                                        setModalAction(() => () => 
+                                                                        setUserList((prevLists) => 
+                                                                        prevLists.map((list, i) => 
+                                                                            i === index
+                                                                                ? { ...list, items: list.items.filter((_, j) => j !== itemIndex) }
                                                                                 : list
-                                                                                )
-                                                                            );
-                                                                        }
+                                                                            )
+                                                                        )
+                                                                    );
+
+                                                                    setConfirmationModalOpen(true);
                                                                     }}
                                                                     className='absolute py-2 top-2 right-2 sm:w-4 sm:h-4 md:w-5 md:h-5 flex items-center justify-center 
                                                                     bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
@@ -413,9 +433,11 @@ function Create() {
                                                                 className='w-28 sm:w-36 md:w-48 h-auto 
                                                                 object-contain mb-3 rounded'/>
 
-                                                                <p className='text-xs text-gray-600 text-center'>
-                                                                    {item.description}
-                                                                </p>
+                                                                {item.description && (
+                                                                    <p className='text-xs text-gray-600 text-center'>
+                                                                        {item.description}
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                             )}
                                                         </Draggable>
@@ -439,7 +461,10 @@ function Create() {
             {categories.map((category) => (
                 <button
                     key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
+                    onClick={() => {
+                        setSelectedCategory(category.id)
+                        setCurrentPage(1);
+                    }}
                     className={`px-4 py-2 rounded
                         ${selectedCategory === category.id
                             ? 'bg-indigo-500 text-white'
@@ -474,7 +499,8 @@ function Create() {
         {isButtonVisible && (
             <button 
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-                className='fixed bottom-4 right-4 bg-indigo-500 text-white px-4 py-2 rounded shadow-md'
+                className='fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-indigo-500
+                text-white px-4 py-2 rounded shadow-md'
             >
                 Scroll-to-Top
             </button>
