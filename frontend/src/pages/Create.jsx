@@ -342,7 +342,7 @@ function Create() {
                                     
                                             <button
                                                 onClick={() => {
-                                                    setModalAction(`Are you sure you want to delete the list: ${list.title}?`);
+                                                    setModalMessage(`Are you sure you want to delete the list: ${list.title}?`);
                                                     setModalAction(() => () => 
                                                         setUserList((prevLists) => prevLists.filter((_, i) => i !== index))
                                                     );
@@ -429,15 +429,13 @@ function Create() {
                                                                     {item.release_date}
                                                                 </p>
 
-                                                                <img src={item.poster_path} alt={item.title} 
-                                                                className='w-28 sm:w-36 md:w-48 h-auto 
-                                                                object-contain mb-3 rounded'/>
-
-                                                                {item.description && (
-                                                                    <p className='text-xs text-gray-600 text-center'>
-                                                                        {item.description}
-                                                                    </p>
-                                                                )}
+                                                                <img 
+                                                                    src={item.poster_path} 
+                                                                    alt={item.title} 
+                                                                    className='w-36 sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-80 
+                                                                    lg:h-96 object-contain mb-3 rounded'
+                                                                    onError={(e) => e.target.src= 'https://via.placeholder.com/300x400?text=No+Image'}
+                                                                />
                                                             </div>
                                                             )}
                                                         </Draggable>
@@ -457,7 +455,7 @@ function Create() {
         </div>
 
         {/* Search Input Tabs */}
-        <div className='flex space-x-4 mb-4'>
+        <div className='flex overflow-x-auto sm:justify-center gap-2 sm:gap-4 mb-4 px-2'>
             {categories.map((category) => (
                 <button
                     key={category.id}
@@ -465,7 +463,7 @@ function Create() {
                         setSelectedCategory(category.id)
                         setCurrentPage(1);
                     }}
-                    className={`px-4 py-2 rounded
+                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded whitespace-nowrap
                         ${selectedCategory === category.id
                             ? 'bg-indigo-500 text-white'
                             : 'bg-indigo-200 text-indigo-600 border border-indigo-500'
@@ -486,7 +484,6 @@ function Create() {
         />
 
         {/*  Search Results */}
-        
         <SearchResults 
             searchResults={searchResult} 
             onOpenModal={openModal} 

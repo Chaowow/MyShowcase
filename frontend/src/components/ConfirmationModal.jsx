@@ -6,7 +6,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-md w-96">
-                <p className="text-lg mb-4">{message}</p>
+                <p className="text-lg mb-4 break-words">{message}</p>
                 <div className="flex justify-end space-x-4">
                     <button
                         onClick={() => {
