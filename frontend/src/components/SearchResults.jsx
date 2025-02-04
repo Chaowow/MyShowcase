@@ -1,11 +1,21 @@
 import React from 'react';
 
-function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, setCurrentPage, selectedCategory }) {
+function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, setCurrentPage, selectedCategory, isLoading }) {
     return (
         <div>
-          {searchResults ? (
+          {isLoading ? (
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6'>
+              {[...Array(8)].map((_, index) => (
+                <div key={index} className='animate-pulse space-y-2'>
+                  <div className='bg-gray-300 w-full h-48 sm:h-64 md:h-72 lg:h-80 rounded'></div>
+                  <div className='bg-gray-300 h-4 w-3/4 rounded'></div>
+                  <div className='bg-gray-300 h-4 w-1/2 rounded'></div>
+                </div>
+              ))}
+            </div>
+          ) : searchResults ? (
             <>
-              <h3 className='text-2xl text-white mb-4'>Search Results:</h3>
+             <h3 className='text-2xl text-white mb-4'>Search Results:</h3>
               {searchResults.length === 0 ? (
                 <p className='text-slate-300'>No results found.</p>
               ) : (

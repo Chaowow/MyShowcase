@@ -34,6 +34,8 @@ function Create() {
     const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
     const [modalAction, setModalAction] = useState(() => () => {});
     const [modalMessage, setModalMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [cachedResults, setCachedResults] = useState({});
 
 
     // Update screen size on resize 
@@ -61,11 +63,19 @@ function Create() {
         };
     }, []);
     
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
     // Fetch search results based on category and query
     const fetchResults = useCallback(
         async (query, paginationKey = 1) => {
+            const cacheKey = `${selectedCategory}-${query}-${paginationKey}`
+
+            if (cachedResults[cacheKey]) {
+                setSearchResults(cachedResults[cacheKey].results);
+                setTotalPages(cachedResults[cacheKey].totalPages);
+                return;
+            }
+
             const categoryConfig = {
                 movies: {
                     url: 'http://localhost:5000/api/tmdb',
@@ -107,20 +117,29 @@ function Create() {
             const config = categoryConfig[selectedCategory];
             if (!config) return;
 
+            setIsLoading(true);
+
             try {
                 const response = await axios.get(config.url, { params: config.params });
                 const { results = [], totalPages = 0 } = config.processResponse(response.data);
 
                 setSearchResults(results);
                 setTotalPages(totalPages);
+
+                setCachedResults((prevCache) => ({
+                    ...prevCache,
+                    [cacheKey]: {results, totalPages}
+                }));
             } catch (error) {
                 console.error('Error fetching results', error.message);
                 setSearchResults([]); 
                 setTotalPages(0); 
+            } finally {
+                setIsLoading(false);
             }
         },
     
-        [selectedCategory]
+        [selectedCategory, cachedResults]
     );
     
     // Fetch results when the debounced search query changes
@@ -491,6 +510,7 @@ function Create() {
             totalPages={totalPages} 
             setCurrentPage={setCurrentPage}
             selectedCategory={selectedCategory}
+            isLoading={isLoading}
         />
         
         {isButtonVisible && (
