@@ -1,4 +1,6 @@
 import React from 'react';
+import placeholder from '../assets/placeholder.jpg'
+
 
 function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, setCurrentPage, selectedCategory, isLoading }) {
     return (
@@ -65,13 +67,11 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                         <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
 
                           {/* Book Cover */}
-                          {item.volumeInfo?.imageLinks?.thumbnail && (
-                            <img
-                              src={item.volumeInfo.imageLinks.thumbnail}
-                              alt={item.volumeInfo.title}
-                              className="w-40 sm:w-60 object-cover mb-2 rounded"
-                            />
-                          )}
+                          <img 
+                            src={item.volumeInfo?.imageLinks?.thumbnail || placeholder}
+                            alt={item.volumeInfo?.title || 'Book cover not available'}
+                            className='w-40 sm:w-60 object-cover mb-2 rounded'
+                          />
 
                           {/* Title */}
                           <h4 className="text-xl font-semibold text-slate-100">

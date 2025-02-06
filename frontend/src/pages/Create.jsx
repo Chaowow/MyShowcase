@@ -6,6 +6,7 @@ import useDebounce from '../hooks/useDebounce';
 import Modal from '../components/Modal';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ConfirmationModal from '../components/ConfirmationModal';
+import placeholder from '../assets/placeholder.jpg'
 
 function Create() {
     const [open, setOpen] = useState(false); // Controls whether the create list form is opem
@@ -200,15 +201,19 @@ function Create() {
                 ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
                 : item.volumeInfo?.imageLinks?.thumbnail 
                 || item.background_image
-                || 'https://via.placeholder.com/300x450?text=No+Image',
+                || placeholder,
         };
     
         setUserList((prevLists) =>
-            prevLists.map((list) =>
-                list.title === listTitle
-                    ? { ...list, items: [...list.items, itemToAdd] }
-                    : list
-            )
+            prevLists.map((list) => {
+                if (list.title === listTitle) {
+                    if (list.items.length >= 5) {
+                        return list;
+                    }
+                    return { ...list, items: [...list.items, itemToAdd] };
+                }
+                return list;
+            })
         );
     };
 
@@ -222,16 +227,28 @@ function Create() {
         setSelectedItem(null);
     }
 
-    // Get styling for medals in the list, may change to better styling/animation
+    // Get styling for medals in the list
     const getMedalStyle = (movieIndex) => {
         if (movieIndex === 0) {
-            return { background: 'bg-yellow-300', border: 'border-yellow-300 border-4', text: '1st'};
+            return { 
+                background: 'bg-gradient-to-br from-yellow-200 to-yellow-400 shadow-lg animate-pulse', 
+                border: 'border-yellow-300 border-4 shadow-yellow-400 ring-2 ring-yellow-500', 
+                text: '1st'
+            };
         }
         if (movieIndex === 1) {
-            return { background: 'bg-gray-400', border: 'border-gray-400 border-4', text: '2nd'};
+            return { 
+                background: 'bg-gradient-to-br from-gray-200 to-gray-400 shadow-md', 
+                border: 'border-gray-400 border-4 shadow-gray-400', 
+                text: '2nd'
+            };
         }
         if (movieIndex === 2) {
-            return { background: 'bg-yellow-700', border: 'border-yellow-700 border-4', text: '3rd'};
+            return { 
+                background: 'bg-gradient-to-br from-yellow-600 to-yellow-800 shadow-md', 
+                border: 'border-yellow-700 border-4 shadow-yellow-900', 
+                text: '3rd'
+            };
         }
 
         return { background: 'bg-indigo-200', border: 'border-indigo-200', text: movieIndex + 1 }
@@ -410,7 +427,7 @@ function Create() {
                                                                 {...provided.draggableProps}
                                                                 {...provided.dragHandleProps}
                                                                 className={`bg-indigo-200 p-4 rounded-lg shadow-md flex flex-col items-center relative
-                                                                hover:shadow-lg ${border}`}
+                                                                ${border}`}
                                                             >
                                                                 <button 
                                                                     onClick={() => {
@@ -435,8 +452,8 @@ function Create() {
                                                                 </button>
 
                                                             
-                                                                <h5 className={`absolute top-2 left-2 w-6 h-6 flex items-center justify-center ${background}
-                                                                text-xs rounded-full font-bold shadow`}>
+                                                                <h5 className={`absolute top-2 left-2 w-7 h-7 flex items-center justify-center ${background}
+                                                                text-xs rounded-full font-bold`}>
                                                                     {text}
                                                                 </h5>
                                                                 
@@ -449,11 +466,10 @@ function Create() {
                                                                 </p>
 
                                                                 <img 
-                                                                    src={item.poster_path} 
+                                                                    src={item.poster_path || placeholder} 
                                                                     alt={item.title} 
                                                                     className='w-36 sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-80 
                                                                     lg:h-96 object-contain mb-3 rounded'
-                                                                    onError={(e) => e.target.src= 'https://via.placeholder.com/300x400?text=No+Image'}
                                                                 />
                                                             </div>
                                                             )}
@@ -527,7 +543,11 @@ function Create() {
             <h3 className='text-xl font-semibold mb-4'>Select a List</h3>
             <ul>
                 {userList.map((list, index) => (
-                    <li key={index} className='border-b py-2 flex justify-between items-center'>
+                    <li 
+                        key={index} 
+                        className={`border-b py-2 flex justify-between items-center transition
+                        ${list.items.length >= 5 ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
 
                         <h4 className='flex-1 font-bold text-xs sm:text-sm lg:text-base overflow-hidden text-ellipsis 
                         whitespace-nowrap max-w-[80%]'>
@@ -536,13 +556,16 @@ function Create() {
 
                         <button 
                             onClick={() => {
-                                addItemToList(list.title, selectedItem);
-                                closeModal();
+                                if (list.items.length < 5) {
+                                    addItemToList(list.title, selectedItem);
+                                    closeModal();
+                                }
                             }}
-                            className='bg-indigo-500 text-white px-3 py-1 rounded
-                            hover:bg-indigo-600'
+                            disabled={list.items.length >= 5}
+                            className={`bg-indigo-500 text-white px-3 py-1 rounded
+                            hover:bg-indigo-600 ${list.items.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            Add
+                            {list.items.length >= 5 ? 'Full' : 'Add'}
                         </button>
                     </li>
                 ))}
