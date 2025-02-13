@@ -26,7 +26,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                     if (selectedCategory === 'movies') {
                   
                       return (
-                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col items-center text-center'>
 
                           {/* Poster */}
                           {item.poster_path && (
@@ -64,7 +64,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                     } else if (selectedCategory === 'books') {
         
                       return (
-                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col items-center text-center'>
 
                           {/* Book Cover */}
                           <img 
@@ -101,7 +101,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                     } else if (selectedCategory === 'tvShows') {
 
                       return (
-                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col items-center text-center'>
 
                           {/* Tv Show Cover */}
                           {item.poster_path && (
@@ -140,7 +140,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                     } else if (selectedCategory === 'videoGames') {
 
                       return (
-                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col'>
+                        <div key={item.id} className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col items-center text-center'>
 
                           {/* Video Game Image */}
                           {item.background_image && (
@@ -194,7 +194,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                 >
                   Previous
                 </button>
-                <span className='text-white'>{`Page ${currentPage} of ${totalPages}`}</span>
+                <span className='text-white'>{`${currentPage} of ${totalPages}`}</span>
                 <button
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
