@@ -18,7 +18,7 @@ function Header() {
            <div className=
            'text-3xl md:text-5xl font-bold font-mono text-white'>
               <Link to='/' className='hover:opacity-90'>
-                My Showcase
+                MyTopShowcase
               </Link>
             {/* Change font later */}
             </div>

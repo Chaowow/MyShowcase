@@ -13,7 +13,7 @@ function Home() {
 
         <h1 className='text-4xl md:text-6xl font-bold
          text-white mb-8'>
-          Welcome to MyShowcase.
+          Welcome to MyTopShowcase.
         </h1>
         
         <p className='text-lg md:text-2xl max-w-xl mb-8'>
@@ -54,7 +54,7 @@ function Home() {
         </h2>
 
         <p className='text-lg md:text-xl max-w-3xl'>
-          MyShowcase let's you create as many lists as you want, as niche 
+          MyTopShowcase let's you create as many lists as you want, as niche 
           as you want. Allowing you to show off and keep track of 
           your favorite things, you can also explain why they're your favorite.
         </p>
