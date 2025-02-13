@@ -43,6 +43,15 @@ function Header() {
             <ul className='flex flex-col md:flex-row space-y-4 md:space-y-0 
             md:space-x-6 items-center text-lg'>
               <li>
+                <Link
+                to='about'
+                className='text-slate-300 hover:text-white'
+                onClick={toggleMenu}
+                >
+                  ABOUT
+                </Link>
+              </li>
+              <li>
                 <Link 
                 to='create' 
                 className='text-slate-300 hover:text-white'

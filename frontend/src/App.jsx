@@ -11,6 +11,7 @@ import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
 import LogIn from "./pages/LogIn";
 import SignUp from "./pages/SignUp";
+import About from "./pages/About";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/about" element={<About />} />
       </Routes>
       <Footer />
     </Router>
