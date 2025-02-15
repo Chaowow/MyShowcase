@@ -36,7 +36,7 @@ function Form ({ open, onSave }) {
 
                 <label className='block mb-2 text-white'>Description</label>
                 <textarea 
-                    type='text'
+                    name='text'
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className='border p-2 mb-4 w-full bg-slate-200'
