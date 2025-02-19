@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import { useAuth0 } from '@auth0/auth0-react';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isAuth = false;
+
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -69,34 +72,31 @@ function Header() {
                   DISCOVER
                 </Link>
               </li>
-              <li>
-                <Link 
-                to='signup' 
-                className='text-slate-300 hover:text-white'
-                onClick={toggleMenu}
-                >
-                  SIGN UP
-                </Link>
-              </li>
-              <li>
-                <Link 
-                to='/login' 
-                className='text-slate-300 hover:text-white'
-                onClick={toggleMenu}
-                >
-                    LOG IN
-                </Link>
-              </li>
-              {/* Conditional Profile link render for now */}
-              {isAuth && (
+              
+              {isAuthenticated ? (
+                <>
+                  <li>
+                    <Link to='/profile' className='text-slate-300 hover:text-white' onClick={toggleMenu}>
+                      PROFILE
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => logout({ returnTo: window.location.origin })}
+                      className='bg-violet-500 text-white px-4 py-2 rounded hover:bg-violet-600 transition'
+                    >
+                      LOG OUT
+                    </button>
+                  </li>
+                </>
+              ) : (
                 <li>
-                  <Link 
-                  to='profile' 
-                  className='text-slate-300 hover:text-white'
-                  onClick={toggleMenu}
+                  <button
+                    onClick={() => loginWithRedirect()}
+                    className='bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition'
                   >
-                    PROFILE
-                  </Link>
+                    LOG IN
+                  </button>
                 </li>
               )}
             </ul>
