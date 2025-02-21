@@ -1,6 +1,7 @@
 const express = require('express'); 
 const dotenv = require('dotenv'); 
 const axios = require('axios'); 
+const pool = require('./db');
 const cors = require('cors'); // Import CORS for cross-origin requests
 const NodeCache = require('node-cache'); // Import NodeCache for caching
 const apiCaller = require('./utils/apiCaller'); // Custom utility for API calls
@@ -17,6 +18,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.send('Backend server is running!');
 });
+
+const usersRoutes = require('./routes/users');
+app.use('/users', usersRoutes);
 
 // Cache middleware to reduce duplicate API calls
 const cacheMiddleware = (req, res, next) => {
