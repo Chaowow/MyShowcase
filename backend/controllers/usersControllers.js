@@ -12,27 +12,24 @@ const getUsers = async (req, res) => {
     }
 };
 
-// Add a new user 
-const addUser = async (req, res) => {
+// Add user or retrieve specific user
+const upsertUser = async (req, res) => {
     try {
         const { username, email, auth0_id } = req.body;
 
-        if (!username || !email) {
-            return res.status(400).json({ error: 'Username and email are required.' });
+        if (!auth0_id || !username || !email) {
+            return res.status(400).json({ error: 'auth0_id, username and email are required.' });
         }
 
         const existingUser = await pool.query('SELECT * FROM users WHERE auth0_id = $1', [auth0_id]);
 
         if (existingUser.rows.length > 0) {
-            return res.status(409).json({ 
-                error: 'User already exists.',
-                details: `A user with auth0_id: ${auth0_id} is already registered.`
-             });
+            return res.status(200).json(existingUser.rows[0]);
         }
 
         const result = await pool.query(
-            'INSERT INTO users (username, email, auth0_id) VALUES ($1, $2, $3) RETURNING *',
-            [username, email, auth0_id]
+            'INSERT INTO users (auth0_id, username, email) VALUES ($1, $2, $3) RETURNING *',
+            [auth0_id, username, email]
         );
 
         res.status(201).json(result.rows[0]);
@@ -42,4 +39,4 @@ const addUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, addUser };
+module.exports = { getUsers, upsertUser };
