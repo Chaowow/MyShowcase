@@ -8,6 +8,7 @@ const apiCaller = require('./utils/apiCaller'); // Custom utility for API calls
 
 dotenv.config();
 
+
 const app = express(); 
 const PORT = process.env.PORT || 5000; 
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 320 }); // Initialize cache with TTL of 300 seconds

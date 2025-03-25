@@ -34,9 +34,18 @@ function Profile() {
       } 
     };
 
-    registerOrFetchUser();
-  }
-}, [isAuthenticated, user]);
+      registerOrFetchUser();
+    }
+  }, [isAuthenticated, user]);
+
+  const formatJoinDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   if (isLoading) return <p>Loading...</p>
   if (!isAuthenticated) return <p>Please log in to view your profile.</p>
@@ -44,6 +53,9 @@ function Profile() {
   return (
     <div className='bg-indigo-950 p-6 text-white'>
       <h2 className='text-3xl font-bold'>Welcome, {profile?.username || user.name}!</h2>
+      <p className='text-slate-300 mt-2'>
+        Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}
+      </p>
       <img src={user.picture} alt='profile picture' className='w-20 rounded-full mt-4'/>
     </div>
   );
