@@ -44,7 +44,7 @@ const getUserById = async (req, res) => {
         const { auth0_id } = req.params;
 
         const result = await pool.query(
-            'SELECT auth0_id, username, email, created_at, views, likes FROM users WHERE auth0_id = $1',
+            'SELECT * FROM users WHERE auth0_id = $1',
             [auth0_id]
         );
 
@@ -62,4 +62,50 @@ const getUserById = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, upsertUser, getUserById };
+const incrementProfileViews = async (req, res) => {
+    const { auth0_id } = req.params;
+
+    try {
+        const result = await pool.query(
+            `UPDATE users
+             SET views = views + 1
+             WHERE auth0_id = $1
+             RETURNING views`,
+            [auth0_id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ views: result.rows[0].views });
+    } catch (err) {
+        console.error('Error incrementing profile views', err);
+        res.status(500).json({ error: 'Server Error', details: err.message });
+    }
+};
+
+const likeUser = async (req, res) => {
+    const { auth0_id } = req.params;
+
+    try {
+        const result = await pool.query(
+           `UPDATE users
+            SET likes = likes + 1
+            WHERE auth0_id = $1
+            RETURNING *`,
+            [auth0_id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found.'});
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error liking user:', err);
+        res.status(500).json({ error: 'Server Error', details: err.message});
+    }
+};
+
+module.exports = { getUsers, upsertUser, getUserById, incrementProfileViews, likeUser };
