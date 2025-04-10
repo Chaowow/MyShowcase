@@ -108,4 +108,32 @@ const likeUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, upsertUser, getUserById, incrementProfileViews, likeUser };
+const updateUsername = async (req, res) => {
+    const { auth0_id } = req.params;
+    const { username } = req.body;
+
+    try {
+        const result = await pool.query(
+            'UPDATE users SET username = $1 WHERE auth0_id = $2 RETURNING *',
+            [username, auth0_id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating username:', err);
+        res.status(500).json({ error: 'Server error', details: err.message });
+    }
+};
+
+module.exports = { 
+    getUsers, 
+    upsertUser, 
+    getUserById, 
+    incrementProfileViews, 
+    likeUser, 
+    updateUsername
+};

@@ -5,7 +5,8 @@ const {
     upsertUser, 
     getUserById, 
     incrementProfileViews, 
-    likeUser 
+    likeUser,
+    updateUsername
 } = require('../controllers/usersControllers');
 
 router.get('/', getUsers);
@@ -13,5 +14,6 @@ router.post('/', upsertUser);
 router.get('/:auth0_id', getUserById);
 router.patch('/:auth0_id/views', incrementProfileViews);
 router.patch('/:auth0_id/likes', likeUser);
+router.patch('/:auth0_id/username', updateUsername);
 
 module.exports = router;

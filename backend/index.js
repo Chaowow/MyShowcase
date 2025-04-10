@@ -5,6 +5,8 @@ const pool = require('./db');
 const cors = require('cors'); // Import CORS for cross-origin requests
 const NodeCache = require('node-cache'); // Import NodeCache for caching
 const apiCaller = require('./utils/apiCaller'); // Custom utility for API calls
+const usersRoutes = require('./routes/users');
+const listsRoutes = require('./routes/lists');
 
 dotenv.config();
 
@@ -15,13 +17,12 @@ const cache = new NodeCache({ stdTTL: 300, checkperiod: 320 }); // Initialize ca
 
 app.use(cors());
 app.use(express.json());
+app.use('/users', usersRoutes);
+app.use('/lists', listsRoutes);
 
 app.get('/', (req, res) => {
     res.send('Backend server is running!');
 });
-
-const usersRoutes = require('./routes/users');
-app.use('/users', usersRoutes);
 
 // Cache middleware to reduce duplicate API calls
 const cacheMiddleware = (req, res, next) => {
