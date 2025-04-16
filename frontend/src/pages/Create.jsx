@@ -7,8 +7,10 @@ import Modal from '../components/Modal';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ConfirmationModal from '../components/ConfirmationModal';
 import placeholder from '../assets/placeholder.jpg'
+import { useAuth0 } from '@auth0/auth0-react';
 
 function Create() {
+    const { user, isAuthenticated, isLoading} = useAuth0();
     const [open, setOpen] = useState(false); // Controls whether the create list form is opem
     const [searchQuery, setSearchQuery] = useState(''); // Holds the current search query input
     const [searchResult, setSearchResults] = useState(null); // Stores the search results from API calls 
@@ -35,9 +37,8 @@ function Create() {
     const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
     const [modalAction, setModalAction] = useState(() => () => {});
     const [modalMessage, setModalMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingState, setIsLoadingState] = useState(false);
     const [cachedResults, setCachedResults] = useState({});
-
 
     // Update screen size on resize 
     useEffect(() => {
@@ -118,7 +119,7 @@ function Create() {
             const config = categoryConfig[selectedCategory];
             if (!config) return;
 
-            setIsLoading(true);
+            setIsLoadingState(true);
 
             try {
                 const response = await axios.get(config.url, { params: config.params });
@@ -136,7 +137,7 @@ function Create() {
                 setSearchResults([]); 
                 setTotalPages(0); 
             } finally {
-                setIsLoading(false);
+                setIsLoadingState(false);
             }
         },
     
@@ -159,6 +160,22 @@ function Create() {
         }
     }, [searchQuery, currentPage, fetchResults]);
 
+    useEffect(() => {
+        const fetchUserLists = async () => {
+            if (!isAuthenticated || !user) return;
+
+            try {
+                const res = await fetch(`http://localhost:5000/lists/${user.sub}`);
+                const data = await res.json();
+                setUserList(data);
+            } catch (err) {
+                console.error('Error fetching user lists:', err);
+            }
+        };
+
+        fetchUserLists();
+    }, [isAuthenticated, user]);
+
     const maxChar = 52;
 
     const openForm = () => setOpen(!open);
@@ -170,8 +187,30 @@ function Create() {
         { id: 'videoGames', label: 'Video Games'}
     ];
 
-    const saveList = (list) => {
-        setUserList([...userList, { ...list, items: [] }]);
+    const saveList = async (list) => {
+        const newList = {
+            auth0_id: user.sub,
+            title: list.title,
+            items: list.item || [],
+            description: list.description || ''
+        };
+
+        try {
+            const response = await fetch('http://localhost:5000/lists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newList)
+            });
+
+            if (response.ok) {
+                const savedList = await response.json();
+                setUserList([...userList, savedList]);
+            } else {
+                console.error('Failed to save list');
+            }
+        } catch (err) {
+            console.error('Error saving list:', err);
+        }
     };
 
     // Add an item (movie, Tv show, books, or video gamne) to a user-created list
@@ -526,7 +565,7 @@ function Create() {
             totalPages={totalPages} 
             setCurrentPage={setCurrentPage}
             selectedCategory={selectedCategory}
-            isLoading={isLoading}
+            isLoadingState={isLoadingState}
         />
         
         {isButtonVisible && (

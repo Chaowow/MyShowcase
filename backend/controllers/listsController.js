@@ -18,16 +18,16 @@ const getUserLists = async (req, res) => {
 
 const createList = async (req, res) => {
     try {
-        const { auth0_id, title, description, items } = req.body;
-        if (!auth0_id || !title || !Array.isArray(items)) {
+        const { auth0_id, title, items, description } = req.body;
+        if (!auth0_id || !title || !items) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
         const result = await pool.query(
-            `INSERT INTO lists (auth0_id, title, description, items)
+            `INSERT INTO lists (auth0_id, title, items, description)
             VALUES ($1, $2, $3, $4)
             RETURNING *`,
-            [auth0_id, title, description || '', items]
+            [auth0_id, title, JSON.stringify(items), description || null]
         );
         
         res.status(201).json(result.rows[0]);
