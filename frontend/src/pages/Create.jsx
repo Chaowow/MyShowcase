@@ -245,15 +245,36 @@ function Create() {
     
         setUserList((prevLists) =>
             prevLists.map((list) => {
-                if (list.title === listTitle) {
-                    if (list.items.length >= 5) {
-                        return list;
-                    }
-                    return { ...list, items: [...list.items, itemToAdd] };
+                if (list.title === listTitle && list.items.length <= 5) {
+                   const updatedList = { ...list, items: [...list.items, itemToAdd] };
+                   updateListOnServer(updatedList);
+                   return updatedList;
                 }
                 return list;
             })
         );
+    };
+
+    const updateListOnServer = async (list) => {
+        console.log('Updating list with ID:', list.id, list);
+
+        try {
+            const response = await fetch(`http://localhost:5000/lists/${list.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: list.title,
+                    description: list.description || '',
+                    items: list.items
+                })
+            });
+
+            if (!response.ok) {
+                console.error('Failed to update list');
+            }
+        } catch (err) {
+            console.error('Error updating list:', err)
+        }
     };
 
     const openModal = (movie) => {
@@ -308,7 +329,10 @@ function Create() {
                 const [movedItem] = updatedItems.splice(sourceIndex, 1);
                 updatedItems.splice(destinationIndex, 0, movedItem);
 
-                return { ...list, items: updatedItems};
+                const updatedList = { ...list, items: updatedItems };
+                updateListOnServer(updatedList);
+
+                return updatedList;
             })
         );
     };
@@ -363,13 +387,14 @@ function Create() {
                                 <div className='flex space-x-2'>
                                     <button
                                         onClick={() => {
-                                            setUserList((prevLists) =>
-                                                prevLists.map((item, i) => 
-                                                    i === index 
-                                                        ? { ...item, title: tempTitle, description: tempDescription }
-                                                        : item
-                                                )
+                                            const updatedLists = userList.map((item, i) => 
+                                            i === index
+                                                ? { ...item, title: tempTitle, description: tempDescription }
+                                                : item
                                             );
+
+                                            setUserList(updatedLists);
+                                            updateListOnServer(updatedLists[index]);
                                             setIsEditing(null);
                                         }}
                                         className='bg-green-500 text-white px-4 py-3 rounded hover:bg-green-600'
@@ -418,9 +443,21 @@ function Create() {
                                             <button
                                                 onClick={() => {
                                                     setModalMessage(`Are you sure you want to delete the list: ${list.title}?`);
-                                                    setModalAction(() => () => 
-                                                        setUserList((prevLists) => prevLists.filter((_, i) => i !== index))
-                                                    );
+                                                    setModalAction(() => async () => {
+                                                        try {
+                                                            const res = await fetch(`http://localhost:5000/lists/${list.id}`, {
+                                                                method: 'DELETE'
+                                                            });
+                                                        
+                                                            if (res.ok) {
+                                                                setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
+                                                            } else {
+                                                                console.error('Failed to delete list');
+                                                            }
+                                                        } catch (err) {
+                                                            console.error('Error deleting list:', err);
+                                                        }
+                                                    });
 
                                                     setConfirmationModalOpen(true);
                                                 }}
