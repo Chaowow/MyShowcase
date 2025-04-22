@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import placeholder from '../assets/placeholder.jpg'
 
 function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth0();
@@ -56,23 +57,6 @@ function Profile() {
     });
   };
 
-  const handleLike = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/users/${profile.auth0_id}/likes`, {
-        method: 'PATCH'
-      });
-
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setProfile(updatedUser);
-      } else {
-        console.error('Failed to like profile');
-      }
-    } catch (err) {
-      console.error('Error sending like:', err);
-    }
-  };
-
   const handleSaveUsername = async () => {
     try {
       const response = await fetch(`http://localhost:5000/users/${profile.auth0_id}/username`, {
@@ -95,6 +79,7 @@ function Profile() {
 
   if (isLoading) return <p>Loading...</p>
   if (!isAuthenticated) return <p>Please log in to view your profile.</p>
+  if (!profile) return <p>Loading your profile...</p>;
 
   return (
     <div className='bg-indigo-950 p-6 text-white'>
@@ -138,7 +123,13 @@ function Profile() {
         )}
       </div>
 
-      <p className='text-slate-300 mt-2 mb-4'>
+      <img 
+        src={user.picture || placeholder} 
+        alt={`${profile.username}'s profile`} 
+        className='w-20 rounded-full mt-2'
+      />
+
+      <p className='text-slate-300 mt-2 mb-2'>
         Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}
       </p>
 
@@ -147,18 +138,7 @@ function Profile() {
         <span className='text-pink-300 font-semibold ml-2'>{profile?.likes}</span> likes
       </p>
 
-      <img src={user.picture} alt='profile picture' className='w-20 rounded-full mt-4'/>
-
-      {isAuthenticated && profile && user.sub !== profile.auth0_id && (
-        <button
-          onClick={handleLike}
-          className='mt-4 px-4 py-2 bg-pink-300 hover:bg-pink-400 text-white rounded-md transition'
-        >
-          ❤️ Like
-        </button>
-      )}
-
-      <div className='mt-6'>
+      <div className='mt-8'>
         <h3 className='text-xl font-semibold mb-2'>Your Lists</h3>
 
         {lists.length == 0 ? (
@@ -173,7 +153,7 @@ function Profile() {
                   {list.items.map((item, index) => (
                     <div key={index} className='flex gap-4 bg-indigo-800 p-3 rounded-lg'>
                       <img 
-                        src={item.image || 'https://via.placeholder.com/100x150?text=No+Image'}
+                        src={item.image || placeholder}
                         alt={item.title}
                         className='w-20 h-28 object-contain rounded-md'
                       />

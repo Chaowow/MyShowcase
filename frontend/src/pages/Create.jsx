@@ -236,7 +236,7 @@ function Create() {
                     ? item.platforms.join(', ')
                     : 'Platforms not available'
                 : null,
-            poster_path: item.poster_path
+            image: item.poster_path
                 ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
                 : item.volumeInfo?.imageLinks?.thumbnail 
                 || item.background_image
@@ -256,8 +256,6 @@ function Create() {
     };
 
     const updateListOnServer = async (list) => {
-        console.log('Updating list with ID:', list.id, list);
-
         try {
             const response = await fetch(`http://localhost:5000/lists/${list.id}`, {
                 method: 'PATCH',
@@ -509,14 +507,20 @@ function Create() {
                                                                     onClick={() => {
                                                                         setModalMessage(`Are you sure you want to delete the item: ${item.title}?`);
                                                                         setModalAction(() => () => 
-                                                                        setUserList((prevLists) => 
-                                                                        prevLists.map((list, i) => 
-                                                                            i === index
-                                                                                ? { ...list, items: list.items.filter((_, j) => j !== itemIndex) }
-                                                                                : list
+                                                                            setUserList((prevLists) => 
+                                                                                prevLists.map((list, i) => {
+                                                                                    if (i === index) {
+                                                                                        const updatedList = {
+                                                                                            ...list, 
+                                                                                            items: list.items.filter((_, j) => j != itemIndex)
+                                                                                        };
+                                                                                        updateListOnServer(updatedList);
+                                                                                        return updatedList;
+                                                                                    }
+                                                                                    return list;
+                                                                                })
                                                                             )
-                                                                        )
-                                                                    );
+                                                                        );
 
                                                                     setConfirmationModalOpen(true);
                                                                     }}
@@ -542,7 +546,7 @@ function Create() {
                                                                 </p>
 
                                                                 <img 
-                                                                    src={item.poster_path || placeholder} 
+                                                                    src={item.image || placeholder} 
                                                                     alt={item.title} 
                                                                     className='w-36 sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-80 
                                                                     lg:h-96 object-contain mb-3 rounded'

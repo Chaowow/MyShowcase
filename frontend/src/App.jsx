@@ -13,6 +13,7 @@ import LogIn from "./pages/LogIn";
 import SignUp from "./pages/SignUp";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import PublicProfile from "./pages/PublicProfile";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/create" element={<Create />} />
         <Route path="/discover" element={<Discover />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/user/:username" element={<PublicProfile />} />
         <Route path="/login" element={<LogIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/about" element={<About />} />
