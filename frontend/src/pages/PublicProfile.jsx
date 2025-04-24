@@ -99,20 +99,33 @@ function PublicProfile() {
               <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {lists.map((list) => (
                   <li key={list.id} className='bg-indigo-900 p-4 rounded shadow'>
-                    <h4 className='text-lg font-bold mb-1'>{list.title}</h4>
-                    <div className='space-y-3'>
-                      {list.items.map((item, index) => (
-                        <div key={index} className='flex gap-4 bg-indigo-800 p-3 rounded'>
+                    <div className='space-y-4'>
+                      {list.items[0] && (
+                        <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
                           <img
-                            src={item.image || 'https://via.placeholder.com/100x150?text=No+Image'}
-                            alt={item.title}
-                            className='w-20 h-28 object-contain rounded'
+                            src={list.items[0].image || placeholder}
+                            alt={list.items[0].title}
+                            className='w-24 h-32 object-contain rounded'
                           />
-                          <div>
-                            <p className='text-white font-semibold'>{item.title}</p>
+                          <div className='flex flex-col justify-center'>
+                            <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
+                            <p className='text-sm text-slate-400'>#1 Pick</p>
                           </div>
                         </div>
-                      ))}
+                      )}
+
+                      <div className='grid grid-cols-2 gap-4'>
+                        {list.items.slice(1).map((item, index) => (
+                          <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                            <img
+                              src={item.image || placeholder}
+                              alt={item.title}
+                              className='w-full h-32 object-contain rounded mb-2'
+                            />
+                            <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </li>
                 ))}

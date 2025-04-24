@@ -1,5 +1,4 @@
 import React from 'react';
-import { IoIosCloseCircle } from "react-icons/io";
 
 function Modal({ isOpen, onClose, children }) {
     if (!isOpen) return null;
@@ -9,7 +8,7 @@ function Modal({ isOpen, onClose, children }) {
     justify-center z-50'>
 
         {/* Modal Content */}
-        <div className='bg-white w-11/12 md:w-2/3 lg:w-1/2 rounded-lg 
+        <div className='bg-white w-full max-w-md max-h-[80vh] overflow-y-auto rounded-lg 
         shadow-lg p-6 relative'>
             <button
                 onClick={onClose}
