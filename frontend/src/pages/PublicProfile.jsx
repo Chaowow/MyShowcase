@@ -99,6 +99,7 @@ function PublicProfile() {
               <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
                 {lists.map((list) => (
                   <li key={list.id} className='bg-indigo-900 p-4 rounded shadow'>
+                    <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
                     <div className='space-y-4'>
                       {list.items[0] && (
                         <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
@@ -127,6 +128,14 @@ function PublicProfile() {
                         ))}
                       </div>
                     </div>
+
+                    <p className='text-sm text-slate-400 mt-4'>
+                      Created on {new Date(list.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
                   </li>
                 ))}
               </ul>
