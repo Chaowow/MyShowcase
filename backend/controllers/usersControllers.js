@@ -146,6 +146,31 @@ const getUserByUsername = async (req, res) => {
     }
 };
 
+const updatePfp = async (req, res) => {
+    const { auth0_id } = req.params;
+    const { pfp } = req.body;
+
+    if (!pfp) {
+        return res.status(400).json({ error: 'Profile picture URL is required.'});
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE users SET pfp = $1 WHERE auth0_id = $2 RETURNING *',
+            [pfp, auth0_id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error:  'User not found' });
+        }
+
+        res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating profile picture:', err);
+        res.status(500).json({ error: 'Server error', details: err.message });
+    }
+};
+
 module.exports = { 
     getUsers, 
     upsertUser, 
@@ -153,5 +178,6 @@ module.exports = {
     incrementProfileViews, 
     likeUser, 
     updateUsername,
-    getUserByUsername
+    getUserByUsername,
+    updatePfp
 };

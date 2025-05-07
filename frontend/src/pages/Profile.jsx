@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import placeholder from '../assets/placeholder.jpg'
+import monkey from '../assets/Monkey.png';
+import cat from '../assets/Cat.png';
+import dog from '../assets/Dog.png';
+import owl from '../assets/Owl.png';
+
 
 function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth0();
@@ -8,6 +13,8 @@ function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
   const [lists, setLists] = useState([]);
+  const [isSelectingAvatar, setIsSelectingAvatar] = useState(false);
+  const [newPfp, setNewPfp] = useState(profile?.pfp || '');
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -24,7 +31,7 @@ function Profile() {
           });
 
           const data = await response.json();
-          
+
           if (response.ok || response.status === 409) {
             setProfile(data);
 
@@ -39,14 +46,27 @@ function Profile() {
             method: 'PATCH'
           });
 
-        }  catch (error) {
+        } catch (error) {
           console.error('Error:', error);
-      } 
-    };
+        }
+      };
 
       registerOrFetchUser();
     }
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (profile?.pfp) {
+      setNewPfp(profile.pfp);
+    }
+  }, [profile]);
+
+  const avatars = [
+    { src: monkey, alt: 'Monkey' },
+    { src: cat, alt: 'Cat' },
+    { src: dog, alt: 'Dog' },
+    { src: owl, alt: 'Owl' }
+  ];
 
   const formatJoinDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -77,6 +97,26 @@ function Profile() {
     }
   };
 
+  const handleSavePfp = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/users/${profile.auth0_id}/pfp`, {
+        method: 'PATCH',
+        headers: { 'Content-Type' : 'application/json' },
+        body: JSON.stringify({ pfp: newPfp })
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setProfile(updated);
+        setIsSelectingAvatar(false);
+      } else {
+        console.error('Failed to update profile picture');
+      }
+    } catch (err) {
+      console.error('Error updating profile picture:', err);
+    }
+  };
+
   if (isLoading) return <p>Loading...</p>
   if (!isAuthenticated) return <p>Please log in to view your profile.</p>
   if (!profile) return <p>Loading your profile...</p>;
@@ -86,7 +126,7 @@ function Profile() {
       <div className='flex items-center gap-4 mb-2'>
         {isEditing ? (
           <>
-            <input 
+            <input
               type='text'
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
@@ -123,18 +163,53 @@ function Profile() {
         )}
       </div>
 
-      <img 
-        src={user.picture || placeholder} 
-        alt={`${profile.username}'s profile`} 
-        className='w-20 rounded-full mt-2'
+      <img
+        src={profile?.pfp || user.picture || placeholder}
+        alt={`${profile.username}'s profile`}
+        onClick={() => setIsSelectingAvatar(!isSelectingAvatar)}
+        className='w-20 h-20 rounded-full mt-4 border-2 border-white shadow cursor-pointer hover:opacity-80 transition'
       />
+
+      {isSelectingAvatar &&  (
+        <div className='mt-4'>
+          <h4 className='text-lg font-semibold mb-2'>Choose Your Avatar</h4>
+          <div className='grid grid-cols-3 sm:grid-cols-4 gap-4'>
+            {avatars.map((avatar, idx) => (
+              <img 
+                key={idx}
+                src={avatar.src}
+                alt={avatar.alt}
+                onClick={() => setNewPfp(avatar.src)}
+                className={`w-16 h-16 rounded-full cursor-pointer border-4 transition ${
+                  newPfp === avatar.src ? 'border-green-300' : 'border-transparent'
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className='mt-3 flex gap-2'>
+            <button
+              onClick={handleSavePfp}
+              className='bg-green-600 text-white px-3 py-1 rounded'
+            >
+              Save Avatar
+            </button>
+            <button
+              onClick={() => setIsSelectingAvatar(false)}
+              className='bg-gray-500 text-white px-3 py-1 rounded'
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <p className='text-slate-300 mt-2 mb-2'>
         Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}
       </p>
 
       <p className='text-lg mt-2'>
-        <span className='text-indigo-300 font-semibold'>{profile?.views}</span> views · 
+        <span className='text-indigo-300 font-semibold'>{profile?.views}</span> views ·
         <span className='text-pink-300 font-semibold ml-2'>{profile?.likes}</span> likes
       </p>
 
@@ -152,7 +227,7 @@ function Profile() {
                 <div className='space-y-4'>
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
-                      <img 
+                      <img
                         src={list.items[0].image || placeholder}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
@@ -167,7 +242,7 @@ function Profile() {
                   <div className='grid grid-cols-2 gap-4'>
                     {list.items.slice(1).map((item, index) => (
                       <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
-                        <img 
+                        <img
                           src={item.image || placeholder}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
