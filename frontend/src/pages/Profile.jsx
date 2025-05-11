@@ -12,13 +12,14 @@ function Profile() {
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
-  const [lists, setLists] = useState([]);
   const [isSelectingAvatar, setIsSelectingAvatar] = useState(false);
   const [newPfp, setNewPfp] = useState(profile?.pfp || '');
+  const [pinnedLists, setPinnedLists] = useState([]);
+  const [otherLists, setOtherLists] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      const registerOrFetchUser = async () => {
+      const fetchData = async () => {
         try {
           const response = await fetch('http://localhost:5000/users', {
             method: 'POST',
@@ -31,22 +32,25 @@ function Profile() {
           });
 
           const data = await response.json();
+          setProfile(data)
 
-          if (response.ok || response.status === 409) {
-            setProfile(data);
+          const allRes = await fetch(`http://localhost:5000/lists/${data.auth0_id}`);
+          const allLists = await allRes.json();
 
-            const listRes = await fetch(`http://localhost:5000/lists/${data.auth0_id}`);
-            const listsData = await listRes.json();
-            setLists(listsData);
-          } else {
-            console.error('Error registering user:', data);
-          }
+          const pinnedRes = await fetch(`http://localhost:5000/lists/pinned/${data.auth0_id}`);
+          const pinned = await pinnedRes.json();
+          setPinnedLists(pinned);
+
+          const remaining = allLists.filter(
+            (list) => !pinned.some((p) => p.id === list.id)
+          );
+          setOtherLists(remaining);
         } catch (error) {
           console.error('Error:', error);
         }
       };
 
-      registerOrFetchUser();
+      fetchData();
     }
   }, [isAuthenticated, user]);
 
@@ -96,7 +100,7 @@ function Profile() {
     try {
       const res = await fetch(`http://localhost:5000/users/${profile.auth0_id}/pfp`, {
         method: 'PATCH',
-        headers: { 'Content-Type' : 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pfp: newPfp })
       });
 
@@ -109,6 +113,36 @@ function Profile() {
       }
     } catch (err) {
       console.error('Error updating profile picture:', err);
+    }
+  };
+
+  const handleTogglePin = async (listId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/lists/pin`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_auth0_id: profile.auth0_id,
+          list_id: listId
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error);
+        return;
+      }
+
+      const pinnedRes = await fetch(`http://localhost:5000/lists/pinned/${profile.auth0_id}`);
+      const pinned = await pinnedRes.json();
+      setPinnedLists(pinned);
+
+      const allRes = await fetch(`http://localhost:5000/lists/${profile.auth0_id}`);
+      const all = await allRes.json();
+      const rest = all.filter((list) => !pinned.some((p) => p.id === list.id));
+      setOtherLists(rest);
+    } catch (err) {
+      console.error('Error toggling pin:', err);
     }
   };
 
@@ -165,19 +199,18 @@ function Profile() {
         className='w-20 h-20 rounded-full mt-4 border-2 border-white shadow cursor-pointer hover:opacity-80 transition'
       />
 
-      {isSelectingAvatar &&  (
+      {isSelectingAvatar && (
         <div className='mt-4'>
           <h4 className='text-lg font-semibold mb-2'>Choose Your Avatar</h4>
           <div className='grid grid-cols-3 sm:grid-cols-4 gap-4'>
             {avatars.map((avatar, idx) => (
-              <img 
+              <img
                 key={idx}
                 src={avatar.src}
                 alt={avatar.alt}
                 onClick={() => setNewPfp(avatar.src)}
-                className={`w-16 h-16 rounded-full cursor-pointer border-4 transition ${
-                  newPfp === avatar.src ? 'border-green-300' : 'border-transparent'
-                }`}
+                className={`w-16 h-16 rounded-full cursor-pointer border-4 transition ${newPfp === avatar.src ? 'border-green-300' : 'border-transparent'
+                  }`}
               />
             ))}
           </div>
@@ -208,14 +241,11 @@ function Profile() {
         <span className='text-pink-300 font-semibold ml-2'>{profile?.likes}</span> likes
       </p>
 
-      <div className='mt-8'>
-        <h3 className='text-xl font-semibold mb-2'>Your Lists</h3>
-
-        {lists.length == 0 ? (
-          <p className='text-slate-400'>You haven't created any lists yet!</p>
-        ) : (
+      {pinnedLists.length > 0 && (
+        <div className='mt-8'>
+          <h3 className='text-xl font-semibold mb-2'>⭐ Pinned Lists</h3>
           <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {lists.map((list) => (
+            {pinnedLists.map((list) => (
               <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
                 <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
 
@@ -247,6 +277,75 @@ function Profile() {
                     ))}
                   </div>
                 </div>
+
+                <button
+                  onClick={() => handleTogglePin(list.id)}
+                  className='mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded'
+                >
+                  Unpin 📌
+                </button>
+
+                <p className='text-sm text-slate-400 mt-4'>
+                  Created on {new Date(list.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className='mt-8'>
+        <h3 className='text-xl font-semibold mb-2'>Your Lists</h3>
+
+        {otherLists.length == 0 ? (
+          <p className='text-slate-400'>You haven't created any lists yet!</p>
+        ) : (
+          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+            {otherLists.map((list) => (
+              <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
+                <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+
+                <div className='space-y-4'>
+                  {list.items[0] && (
+                    <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
+                      <img
+                        src={list.items[0].image || placeholder}
+                        alt={list.items[0].title}
+                        className='w-24 h-32 object-contain rounded'
+                      />
+                      <div className='flex flex-col justify-center'>
+                        <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
+                        <p className='text-sm text-slate-400'>#1 Pick</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className='grid grid-cols-2 gap-4'>
+                    {list.items.slice(1).map((item, index) => (
+                      <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                        <img
+                          src={item.image || placeholder}
+                          alt={item.title}
+                          className='w-full h-32 object-contain rounded mb-2'
+                        />
+                        <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {pinnedLists.length < 3 && (
+                  <button
+                    onClick={() => handleTogglePin(list.id)}
+                    className='mt-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded'
+                  >
+                    Pin 📌
+                  </button>
+                )}
 
                 <p className='text-sm text-slate-400 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {

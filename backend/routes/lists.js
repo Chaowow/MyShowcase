@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getUserLists, createList, updateList, deleteList } = require('../controllers/listsController');
+const { getPinnedLists, togglePinnedList, getUserLists, createList, updateList, deleteList } = require('../controllers/listsController');
 
+router.get('/pinned/:user_auth0_id', getPinnedLists);
+router.patch('/pin', togglePinnedList);
 router.get('/:auth0_id', getUserLists);
 router.post('/', createList);
 router.patch('/:id', updateList);

@@ -1,5 +1,66 @@
 const pool = require('../db');
 
+const togglePinnedList = async (req, res) => {
+    const { user_auth0_id, list_id } = req.body;
+
+    try {
+        const existing = await pool.query(
+            'SELECT * FROM pinned_lists WHERE user_auth0_id = $1 AND list_id = $2',
+            [user_auth0_id, list_id]
+        );
+
+        if (existing.rows.length > 0) {
+            await pool.query(
+                'DELETE FROM pinned_lists WHERE user_auth0_id = $1 AND list_id = $2',
+                [user_auth0_id, list_id]
+            );
+        } else {
+            const countResult = await pool.query(
+                'SELECT COUNT(*) FROM pinned_lists WHERE user_auth0_id = $1',
+                [user_auth0_id]    
+            );
+
+            if (parseInt(countResult.rows[0].count) >= 3) {
+                return res.status(400).json({ error: 'Maximum of 3 pinned lists allowed.' });
+            }
+
+            await pool.query(
+                'INSERT INTO pinned_lists (user_auth0_id, list_id) VALUES ($1, $2)',
+                [user_auth0_id, list_id]
+            );
+        }
+
+        res.status(200).json({ message: 'Pin toggled successfully' });
+    } catch (err) {
+        console.error('Error toggling pinned list:', err);
+        res.status(500).json({ error: 'Server error', details: err.message });
+    }
+};
+
+  const getPinnedLists = async (req, res) => {
+    const { user_auth0_id } = req.params;
+
+    try {
+        const result = await pool.query(
+            `SELECT l.*
+            FROM lists l
+            JOIN pinned_lists p ON l.id = p.list_id
+            WHERE p.user_auth0_id = $1`,
+            [user_auth0_id]
+        );
+
+        const formatted = result.rows.map(row => ({
+            ...row,
+            items: typeof row.items === 'string' ? JSON.parse(row.items) : row.items
+        }));
+
+        res.status(200).json(formatted);
+    } catch (err) {
+        console.error('Error fetching pinned lists:', err);
+        res.status(500).json({ error: 'Server error', details: err.message });
+    }
+};
+
 const getUserLists = async (req, res) => {
     const { auth0_id } = req.params;
 
@@ -79,4 +140,4 @@ const deleteList = async (req, res) => {
     }
 };
 
-module.exports = { getUserLists, createList, updateList, deleteList };
+module.exports = { togglePinnedList, getPinnedLists, getUserLists, createList, updateList, deleteList };
