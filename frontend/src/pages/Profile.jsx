@@ -41,11 +41,6 @@ function Profile() {
           } else {
             console.error('Error registering user:', data);
           }
-
-          await fetch(`http://localhost:5000/users/${user.sub}/views`, {
-            method: 'PATCH'
-          });
-
         } catch (error) {
           console.error('Error:', error);
         }

@@ -6,10 +6,11 @@ import placeholder from '../assets/placeholder.jpg'
 
 function PublicProfile() {
   const { username } = useParams();
-  const { user, isAuthenticated, isLoading } = useAuth0();
+  const { user, isAuthenticated } = useAuth0();
   const [profile, setProfile] = useState(null);
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hasLiked, setHasLiked] = useState(false);
 
   useEffect(() => {
     const fetchPublicProfile = async () => {
@@ -23,6 +24,18 @@ function PublicProfile() {
         const userData = await userRes.json();
         setProfile(userData);
 
+        if (user && user.sub !== userData.auth0_id) {
+          await fetch(`http://localhost:5000/users/${userData.auth0_id}/views`, {
+            method: 'PATCH'
+          });
+
+          const likeCheckRes = await fetch(
+            `http://localhost:5000/users/${user.sub}/likes/${userData.auth0_id}`
+          );
+          const likeStatus = await likeCheckRes.json();
+          setHasLiked(likeStatus.liked);
+        }
+
         const listRes = await fetch(`http://localhost:5000/lists/${userData.auth0_id}`);
         const listData = await listRes.json();
         setLists(listData);
@@ -34,7 +47,7 @@ function PublicProfile() {
     };
 
     fetchPublicProfile();
-  }, [username]);
+  }, [username, user]);
 
   const formatJoinDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -46,19 +59,24 @@ function PublicProfile() {
   };
 
   const handleLike = async () => {
+    if (!user || !profile) return;
+
     try {
-      const response = await fetch(`http://localhost:5000/users/${profile.auth0_id}/likes`, {
-        method: 'PATCH'
+      const res = await fetch(`http://localhost:5000/users/${profile.auth0_id}/likes`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ liker_auth0_id: user.sub })
       });
 
-      if (response.ok) {
-        const updatedUser = await response.json();
+      if (res.ok) {
+        const updatedUser = await res.json();
         setProfile(updatedUser);
+        setHasLiked(!hasLiked); 
       } else {
-        console.error('Failed to like profile');
+        console.error('Failed to toggle like');
       }
     } catch (err) {
-      console.error('Error sending like:', err);
+      console.error('Error toggling like:', err);
     }
   };
 
@@ -85,9 +103,10 @@ function PublicProfile() {
       {isAuthenticated && user?.sub !== profile.auth0_id && (
         <button
           onClick={handleLike}
-          className='mt-4 px-4 py-2 bg-pink-300 hover:bg-pink-400 text-white rounded-md transition'
+          className={`mt-4 px-4 py-2 ${hasLiked ? 'bg-gray-500 hover:bg-gray-600' 
+            : 'bg-pink-300 hover:bg-pink-400'} text-white rounded-md transition}`}
         >
-          ❤️ Like
+          {hasLiked ? '💔 Unlike' : '❤️ Like'}
         </button>
       )}
 

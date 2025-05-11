@@ -5,17 +5,19 @@ const {
     upsertUser, 
     getUserById, 
     incrementProfileViews, 
-    likeUser,
+    toggleLikeUser,
+    checkIfLiked,
     updateUsername,
     getUserByUsername,
-    updatePfp
+    updatePfp,
 } = require('../controllers/usersControllers');
 
 router.get('/', getUsers);
 router.post('/', upsertUser);
 router.get('/:auth0_id', getUserById);
 router.patch('/:auth0_id/views', incrementProfileViews);
-router.patch('/:auth0_id/likes', likeUser);
+router.patch('/:liked_auth0_id/likes', toggleLikeUser);
+router.get('/:liker_auth0_id/likes/:liked_auth0_id', checkIfLiked);
 router.patch('/:auth0_id/username', updateUsername);
 router.get('/username/:username', getUserByUsername);
 router.patch('/:auth0_id/pfp', updatePfp);

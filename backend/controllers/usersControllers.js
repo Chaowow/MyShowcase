@@ -85,26 +85,64 @@ const incrementProfileViews = async (req, res) => {
     }
 };
 
-const likeUser = async (req, res) => {
-    const { auth0_id } = req.params;
+
+const toggleLikeUser = async (req, res) => {
+    const { liker_auth0_id } = req.body;
+    const { liked_auth0_id } = req.params;
+
+    try {
+        const existing = await pool.query(
+            'SELECT * FROM likes WHERE liker_auth0_id = $1 AND liked_auth0_id = $2',
+            [liker_auth0_id, liked_auth0_id]
+        );
+
+        if (existing.rows.length > 0) {
+            await pool.query(
+                'DELETE FROM likes WHERE liker_auth0_id = $1 AND liked_auth0_id = $2',
+                [liker_auth0_id, liked_auth0_id]
+            );
+
+            await pool.query(
+                'UPDATE users SET likes = likes - 1 WHERE auth0_id = $1',
+                [liked_auth0_id]
+            );
+        } else {
+            await pool.query(
+                'INSERT INTO likes (liker_auth0_id, liked_auth0_id) VALUES ($1, $2)',
+                [liker_auth0_id, liked_auth0_id]
+            );
+
+            await pool.query(
+                'UPDATE users SET likes = likes + 1 WHERE auth0_id = $1',
+                [liked_auth0_id]
+            );
+        }
+
+        const user = await pool.query(
+            'SELECT * FROM users WHERE auth0_id = $1',
+            [liked_auth0_id]
+        );
+
+        return res.status(200).json(user.rows[0]);
+    } catch (err) {
+        console.error('Error toggling like:', err);
+        res.status(500).json({ error: 'Server Error', details: err.message });
+    }
+};
+
+const checkIfLiked = async (req, res) => {
+    const { liker_auth0_id, liked_auth0_id } = req.params;
 
     try {
         const result = await pool.query(
-           `UPDATE users
-            SET likes = likes + 1
-            WHERE auth0_id = $1
-            RETURNING *`,
-            [auth0_id]
+            'SELECT * FROM likes WHERE liker_auth0_id = $1 AND liked_auth0_id = $2',
+            [liker_auth0_id, liked_auth0_id]
         );
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found.'});
-        }
-
-        res.status(200).json(result.rows[0]);
+        res.status(200).json({ liked: result.rows.length > 0 });
     } catch (err) {
-        console.error('Error liking user:', err);
-        res.status(500).json({ error: 'Server Error', details: err.message});
+        console.error('Error checking like:', err);
+        res.status(500).json({ error: 'Server Error', details: err.message });
     }
 };
 
@@ -175,8 +213,9 @@ module.exports = {
     getUsers, 
     upsertUser, 
     getUserById, 
-    incrementProfileViews, 
-    likeUser, 
+    incrementProfileViews,  
+    toggleLikeUser,
+    checkIfLiked,
     updateUsername,
     getUserByUsername,
     updatePfp
