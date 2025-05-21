@@ -18,19 +18,24 @@ import PublicProfile from "./pages/PublicProfile";
 function App() {
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/create" element={<Create />} />
-        <Route path="/discover" element={<Discover />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/user/:username" element={<PublicProfile />} />
-        <Route path="/login" element={<LogIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-      </Routes>
-      <Footer />
+      <div className="flex flex-col min-h-screen bg-indigo-950">
+        <Header />
+
+        <main className="flex-grow p-6">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/create" element={<Create />} />
+            <Route path="/discover" element={<Discover />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/user/:username" element={<PublicProfile />} />
+            <Route path="/login" element={<LogIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </Router>
   );
 }

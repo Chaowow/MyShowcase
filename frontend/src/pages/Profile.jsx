@@ -243,12 +243,19 @@ function Profile() {
 
       {pinnedLists.length > 0 && (
         <div className='mt-8'>
-          <h3 className='text-xl font-semibold mb-2'>⭐ Pinned Lists</h3>
+          <h3 className='text-xl font-semibold mb-2 text-yellow-300'>⭐ Pinned Lists</h3>
           <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
             {pinnedLists.map((list) => (
               <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
-                <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
-
+                <div className='flex justify-between items-center mb-4'>
+                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+                  <button
+                    onClick={() => handleTogglePin(list.id)}
+                    className='mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded'
+                  >
+                    Unpin 📌
+                  </button>
+                </div>
                 <div className='space-y-4'>
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
@@ -277,13 +284,6 @@ function Profile() {
                     ))}
                   </div>
                 </div>
-
-                <button
-                  onClick={() => handleTogglePin(list.id)}
-                  className='mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded'
-                >
-                  Unpin 📌
-                </button>
 
                 <p className='text-sm text-slate-400 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {
@@ -307,7 +307,17 @@ function Profile() {
           <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
             {otherLists.map((list) => (
               <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
-                <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+                <div className='flex justify-between items-center mb-4'>
+                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+                  {pinnedLists.length < 3 && (
+                    <button
+                      onClick={() => handleTogglePin(list.id)}
+                      className='mt-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded'
+                    >
+                      Pin 📌
+                    </button>
+                  )}
+                </div>
 
                 <div className='space-y-4'>
                   {list.items[0] && (
@@ -337,15 +347,6 @@ function Profile() {
                     ))}
                   </div>
                 </div>
-
-                {pinnedLists.length < 3 && (
-                  <button
-                    onClick={() => handleTogglePin(list.id)}
-                    className='mt-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded'
-                  >
-                    Pin 📌
-                  </button>
-                )}
 
                 <p className='text-sm text-slate-400 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {

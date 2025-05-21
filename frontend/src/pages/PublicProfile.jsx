@@ -11,6 +11,8 @@ function PublicProfile() {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasLiked, setHasLiked] = useState(false);
+  const [pinnedLists, setPinnedLists] = useState([]);
+  const [otherLists, setOtherLists] = useState([]);
 
   useEffect(() => {
     const fetchPublicProfile = async () => {
@@ -23,6 +25,10 @@ function PublicProfile() {
 
         const userData = await userRes.json();
         setProfile(userData);
+
+        const pinnedRes = await fetch(`http://localhost:5000/lists/pinned/${userData.auth0_id}`);
+        const pinned = await pinnedRes.json();
+        setPinnedLists(pinned)
 
         if (user && user.sub !== userData.auth0_id) {
           await fetch(`http://localhost:5000/users/${userData.auth0_id}/views`, {
@@ -39,6 +45,11 @@ function PublicProfile() {
         const listRes = await fetch(`http://localhost:5000/lists/${userData.auth0_id}`);
         const listData = await listRes.json();
         setLists(listData);
+
+        const remaining = listData.filter(
+          (list) => !pinned.some((p) => p.id === list.id)
+        );
+        setOtherLists(remaining);
       } catch (err) {
         console.error('Error loading public profile:', err);
       } finally {
@@ -71,7 +82,7 @@ function PublicProfile() {
       if (res.ok) {
         const updatedUser = await res.json();
         setProfile(updatedUser);
-        setHasLiked(!hasLiked); 
+        setHasLiked(!hasLiked);
       } else {
         console.error('Failed to toggle like');
       }
@@ -93,7 +104,7 @@ function PublicProfile() {
         className='w-20 h-20 rounded-full mt-4 object-cover border-2 border-white shadow'
       />
 
-      <p className='text-slate-300 mt-2 mb-4'>Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}</p>
+      <p className='text-slate-300 mt-2 mb-2'>Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}</p>
 
       <p className='text-lg mt-2'>
         <span className='text-indigo-300 font-semibold'>{profile?.views}</span> views ·
@@ -103,63 +114,121 @@ function PublicProfile() {
       {isAuthenticated && user?.sub !== profile.auth0_id && (
         <button
           onClick={handleLike}
-          className={`mt-4 px-4 py-2 ${hasLiked ? 'bg-gray-500 hover:bg-gray-600' 
+          className={`mt-4 px-4 py-2 ${hasLiked ? 'bg-gray-500 hover:bg-gray-600'
             : 'bg-pink-300 hover:bg-pink-400'} text-white rounded-md transition}`}
         >
           {hasLiked ? '💔 Unlike' : '❤️ Like'}
         </button>
       )}
 
-      <div className='mt-6'>
-        <h3 className='text-xl font-semibold mb-2'>Lists</h3>
-        {lists.length === 0 ? (
-          <p className='text-slate-400'>This user hasn't shared any lists yet.</p>
-        ) : (
-          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {lists.map((list) => (
-              <li key={list.id} className='bg-indigo-900 p-4 rounded shadow'>
-                <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
-                <div className='space-y-4'>
-                  {list.items[0] && (
-                    <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
-                      <img
-                        src={list.items[0].image || placeholder}
-                        alt={list.items[0].title}
-                        className='w-24 h-32 object-contain rounded'
-                      />
-                      <div className='flex flex-col justify-center'>
-                        <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
-                        <p className='text-sm text-slate-400'>#1 Pick</p>
-                      </div>
-                    </div>
-                  )}
+      {pinnedLists.length > 0 && (
+        <div className='mt-6'>
+          <h3 className='text-xl font-semibold mb-2 text-yellow-300'>⭐ Pinned Lists</h3>
+          {lists.length === 0 ? (
+            <p className='text-slate-400'>This user hasn't shared any lists yet.</p>
+          ) : (
+            <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+              {pinnedLists.map((list) => (
+                <li key={list.id} className='bg-indigo-900 p-4 rounded shadow'>
+                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
 
-                  <div className='grid grid-cols-2 gap-4'>
-                    {list.items.slice(1).map((item, index) => (
-                      <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                  <div className='space-y-4'>
+                    {list.items[0] && (
+                      <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
                         <img
-                          src={item.image || placeholder}
-                          alt={item.title}
-                          className='w-full h-32 object-contain rounded mb-2'
+                          src={list.items[0].image || placeholder}
+                          alt={list.items[0].title}
+                          className='w-24 h-32 object-contain rounded'
                         />
-                        <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                        <div className='flex flex-col justify-center'>
+                          <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
+                          <p className='text-sm text-slate-400'>#1 Pick</p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    )}
 
-                <p className='text-sm text-slate-400 mt-4'>
-                  Created on {new Date(list.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                    <div className='grid grid-cols-2 gap-4'>
+                      {list.items.slice(1).map((item, index) => (
+                        <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                          <img
+                            src={item.image || placeholder}
+                            alt={item.title}
+                            className='w-full h-32 object-contain rounded mb-2'
+                          />
+                          <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className='text-sm text-slate-400 mt-4'>
+                    Created on {new Date(list.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {otherLists.length > 0 && (
+        <div className='mt-8'>
+          <h3 className='text-xl font-semibold mb-2'>Other Lists</h3>
+
+          {otherLists.length == 0 ? (
+            <p className='text-slate-400'>The user has not created any other list</p>
+          ) : (
+            <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {otherLists.map((list) => (
+                <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
+                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+
+                  <div className='space-y-4'>
+                    {list.items[0] && (
+                      <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
+                        <img
+                          src={list.items[0].image || placeholder}
+                          alt={list.items[0].title}
+                          className='w-24 h-32 object-contain rounded'
+                        />
+                        <div className='flex flex-col justify-center'>
+                          <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
+                          <p className='text-sm text-slate-400'>#1 Pick</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className='grid grid-cols-2 gap-4'>
+                      {list.items.slice(1).map((item, index) => (
+                        <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                          <img
+                            src={item.image || placeholder}
+                            alt={item.title}
+                            className='w-full h-32 object-contain rounded mb-2'
+                          />
+                          <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className='text-sm text-slate-400 mt-4'>
+                    Created on {new Date(list.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
