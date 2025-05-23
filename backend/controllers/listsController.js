@@ -133,6 +133,11 @@ const deleteList = async (req, res) => {
             return res.status(404).json({ error: 'List not found'});
         }
 
+        await pool.query(
+            'DELETE FROM pinned_lists WHERE list_id = $1',
+            [id]
+        );
+
         res.status(200).json({ message: 'List deleted successfully', deleted: result.rows[0] });
     } catch (err) {
         console.error('Error deleting list:', err);
