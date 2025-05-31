@@ -16,6 +16,7 @@ function Profile() {
   const [newPfp, setNewPfp] = useState(profile?.pfp || '');
   const [pinnedLists, setPinnedLists] = useState([]);
   const [otherLists, setOtherLists] = useState([]);
+  const [expandedListIds, setExpandedListIds] = useState([]);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -144,6 +145,12 @@ function Profile() {
     } catch (err) {
       console.error('Error toggling pin:', err);
     }
+  };
+
+  const toggleDescription = (id) => {
+    setExpandedListIds((prev) => 
+      prev.includes(id) ? prev.filter((listId) => listId !== id) : [...prev, id]
+    );
   };
 
   if (isLoading) return <p>Loading...</p>
@@ -285,6 +292,21 @@ function Profile() {
                   </div>
                 </div>
 
+                {list.description && (
+                  <>
+                    <button
+                      onClick={() => toggleDescription(list.id)}
+                      className='text-sm mt-2 text-indigo-300 hover:underline'
+                    >
+                      {expandedListIds.includes(list.id) ? 'Hide Description' : 'Show Description'}
+                    </button>
+
+                    {expandedListIds.includes(list.id) && (
+                      <p className='mt-2 text-slate-200'>{list.description}</p>
+                    )}
+                  </>
+                )}
+
                 <p className='text-sm text-slate-400 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -347,6 +369,21 @@ function Profile() {
                     ))}
                   </div>
                 </div>
+                
+                {list.description && (
+                  <>
+                    <button
+                      onClick={() => toggleDescription(list.id)}
+                      className='text-sm mt-2 text-indigo-300 hover:underline'
+                    >
+                      {expandedListIds.includes(list.id) ? 'Hide Description' : 'Show Description'}
+                    </button>
+
+                    {expandedListIds.includes(list.id) && (
+                      <p className='mt-2 text-slate-200'>{list.description}</p>
+                    )}
+                  </>
+                )}
 
                 <p className='text-sm text-slate-400 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {

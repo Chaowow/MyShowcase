@@ -77,7 +77,7 @@ function Create() {
                 setTotalPages(cachedResults[cacheKey].totalPages);
                 return;
             }
-
+            
             const categoryConfig = {
                 movies: {
                     url: 'http://localhost:5000/api/tmdb',
@@ -97,24 +97,24 @@ function Create() {
                 },
                 books: {
                     url: 'http://localhost:5000/api/books',
-                    params: { query, startIndex: (paginationKey - 1) * 8, maxResults: 8 },
-                    processResponse: (data) => {
-                        const totalItems = data.totalItems || 0;
-                        return {
-                            results: data.items || [],
-                            totalPages: Math.ceil(totalItems / 8)
-                        };
-                    }
+                    params: { query, page: paginationKey },
+                    processResponse: (data) => ({
+                        results: data.results,
+                        totalPages: data.totalPages
+                    })
                 },
                 videoGames: {
                     url: 'http://localhost:5000/api/rawg',
-                    params: { query, page: paginationKey, page_size: 8 },
-                    processResponse: (data) => ({
-                        results: data.results,
-                        totalPages: Math.ceil(data.count / 8)
-                    })
+                    params: { query, page: paginationKey},
+                    processResponse: (data) => {
+                        return {
+                            results: data.results,
+                            totalPages: data.total_pages
+                        };
+                    }
                 }
             };
+            
 
             const config = categoryConfig[selectedCategory];
             if (!config) return;
@@ -123,6 +123,7 @@ function Create() {
 
             try {
                 const response = await axios.get(config.url, { params: config.params });
+                
                 const { results = [], totalPages = 0 } = config.processResponse(response.data);
 
                 setSearchResults(results);

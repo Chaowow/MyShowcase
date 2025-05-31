@@ -7,7 +7,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
         <div>
           {isLoading ? (
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6'>
-              {[...Array(8)].map((_, index) => (
+              {[...Array(4)].map((_, index) => (
                 <div key={index} className='animate-pulse space-y-2'>
                   <div className='bg-gray-300 w-full h-48 sm:h-64 md:h-72 lg:h-80 rounded'></div>
                   <div className='bg-gray-300 h-4 w-3/4 rounded'></div>
@@ -86,7 +86,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                           </p>
 
                           {/* Description */}
-                          <p className="text-xs text-slate-400 flex-1 line-clamp-6">
+                          <p className="text-xs text-slate-400 flex-1">
                             {item.volumeInfo?.description || 'No description'}
                           </p>
 

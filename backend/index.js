@@ -31,8 +31,7 @@ const cacheMiddleware = (req, res, next) => {
     // Generate a unique cache key based on the endpoint and query parameters
     let key;
     if (req.path === '/api/books') {
-        const startIdx = startIndex || 0;
-        key = `${req.path}?query=${query}&startIndex=${startIdx}`;
+        key = `${req.path}?query=${query}&page=${page}`;
     } else if (req.path === '/api/tmdb') {
         key = `${req.path}?query=${query}&page=${page}&type=${type}`;
     } else {
@@ -69,7 +68,7 @@ app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
         ? 'https://api.themoviedb.org/3/search/tv'
         : 'https://api.themoviedb.org/3/search/movie';
 
-    const itemsPerPage = 8;
+    const itemsPerPage = 4;
     const tmdbPage = Math.ceil(page / Math.ceil(20 / itemsPerPage));
 
     const params = {
@@ -99,23 +98,32 @@ app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
 
 // Endpoint to fetch books from Google Books API
 app.get('/api/books', cacheMiddleware, async (req, res) => {
-    const { query, startIndex = '0', maxResults = '8' } = req.query;
+    const { query, page = 1 } = req.query;
     const GBOOKS_API_KEY = process.env.GBOOKS_API_KEY;
 
     if (!query) {
         return res.status(400).json({ error: 'Query parameter is required.' });
     }
 
+    const itemsPerPage = 4;
+    const startIndex = (parseInt(page) - 1) * itemsPerPage;
+
     const params = {
         q: query,
-        startIndex: parseInt(startIndex, 10),
-        maxResults: parseInt(maxResults, 10),
+        startIndex,
+        maxResults: itemsPerPage,
         key: GBOOKS_API_KEY,
     };
 
     try {
         const data = await apiCaller('https://www.googleapis.com/books/v1/volumes', params); // Fetch data from Google Books API
-        res.json(data); // Return the fetched data
+
+        const results = data.items || [];
+        const totalItems = data.totalItems || 0;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+
+        res.json({ results, totalPages }); // Return the fetched data
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while fetching data from Google Books.' });
     }
@@ -123,8 +131,9 @@ app.get('/api/books', cacheMiddleware, async (req, res) => {
 
 // Endpoint to fetch video games from RAWG API
 app.get('/api/rawg', cacheMiddleware, async (req, res) => {
-    const { query, page = 1, page_size = 8 } = req.query;
+    const { query, page = 1 } = req.query;
     const RAWG_API_KEY = process.env.RAWG_API_KEY;
+    const page_size = 4;
 
     if (!query) {
         return res.status(400).json({ error: 'Query parameter is required.' });
@@ -150,7 +159,9 @@ app.get('/api/rawg', cacheMiddleware, async (req, res) => {
             platforms: game.platforms ? game.platforms.map((p) => p.platform.name) : []
         }));
 
-        res.json({ results: formattedResults, count: data.count || 0 }); // Return the formatted data
+        const total_pages = Math.ceil((data.count || 0) / page_size);
+
+        res.json({ results: formattedResults, total_pages }); // Return the formatted data
     } catch (error) {
         console.error('RAWG API Error:', error.message);
         res.status(500).json({ error: 'An error occurred while fetching data from RAWG.' });
