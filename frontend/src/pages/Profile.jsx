@@ -12,6 +12,7 @@ function Profile() {
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
+  const [usernameError, setUsernameError] = useState('');
   const [isSelectingAvatar, setIsSelectingAvatar] = useState(false);
   const [newPfp, setNewPfp] = useState(profile?.pfp || '');
   const [pinnedLists, setPinnedLists] = useState([]);
@@ -78,6 +79,7 @@ function Profile() {
   };
 
   const handleSaveUsername = async () => {
+    setUsernameError('');
     try {
       const response = await fetch(`http://localhost:5000/users/${profile.auth0_id}/username`, {
         method: 'PATCH',
@@ -89,11 +91,14 @@ function Profile() {
         const updated = await response.json();
         setProfile(updated);
         setIsEditing(false);
+      } else if (response.status === 409) {
+        setUsernameError('That username is already taken. Please choose another.');
       } else {
         console.error('Failed to update username');
       }
     } catch (err) {
       console.error('Error updating username:', err);
+      setUsernameError('An unexpected error occured. Please try again later.');
     }
   };
 
@@ -159,6 +164,8 @@ function Profile() {
 
   return (
     <div className='bg-indigo-950 p-6 text-white'>
+
+       {usernameError && <p className='text-red-400 text-sm mb-4'>{usernameError}</p>}
       <div className='flex items-center gap-4 mb-2'>
         {isEditing ? (
           <>
@@ -321,7 +328,7 @@ function Profile() {
       )}
 
       <div className='mt-8'>
-        <h3 className='text-xl font-semibold mb-2'>Your Lists</h3>
+        <h3 className='text-xl font-semibold mb-2'>Other Lists</h3>
 
         {otherLists.length == 0 ? (
           <p className='text-slate-400'>You haven't created any lists yet!</p>

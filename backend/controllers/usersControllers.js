@@ -163,6 +163,11 @@ const updateUsername = async (req, res) => {
         res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error('Error updating username:', err);
+
+        if (err.code === '23505') {
+            return res.status(409).json({ error: 'Username already taken' });
+        }
+        
         res.status(500).json({ error: 'Server error', details: err.message });
     }
 };
