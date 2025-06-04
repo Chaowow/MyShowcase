@@ -9,8 +9,6 @@ import Home from "./pages/Home";
 import Create from "./pages/Create";
 import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
-import LogIn from "./pages/LogIn";
-import SignUp from "./pages/SignUp";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PublicProfile from "./pages/PublicProfile";
@@ -28,8 +26,6 @@ function App() {
             <Route path="/discover" element={<Discover />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/user/:username" element={<PublicProfile />} />
-            <Route path="/login" element={<LogIn />} />
-            <Route path="/signup" element={<SignUp />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>

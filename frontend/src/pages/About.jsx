@@ -14,12 +14,11 @@ function About() {
         Why MyTopShowcase?
       </h2>
       <p className='text-lg text-center max-w-3xl mx-auto'>
-        Inspired by Smosh Game's videos on Shayne guesses. MyTopShowcase is a platform for users to share their top 5 favorites
-        in different categories.
+        Inspired by Smosh Games' "Shayne guesses" videos, MyTopShowcase is a platform where users share their top 5 favorites
+        across various categories.
       </p>
       <p className='text-lg text-center max-w-3xl mx-auto mt-4'>
-        Whether it's movies, TV shows, books, or video games, our goal is to create a space where users can visually showcase their favorites
-        and discover new recommendations.
+        Whether it's movies, TV shows, books, or video games, our goal is to create a space where users can visually showcase their favorites.
       </p>
 
       <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto'/>
@@ -27,11 +26,11 @@ function About() {
       <h2 className='text-2xl font-semibold text-center mb-4'>
         How It Works
       </h2>
-      <ul className='list-disc text-lg max-w-2xl mx-auto text-center space-y-2'>
+      <ul className='list-disc text-lg max-w-2xl mx-auto text-left space-y-2 pl-5'>
         <li>Create a showcase with your top 5 favorites.</li>
         <li>Search for media items (movies, TV shows, books, games) to add.</li>
-        <li>Organize and customize your lists as you like.</li>
-        <li>Share your lists with others and explore popular showcases.</li>
+        <li>Organize and customize your lists your way.</li>
+        <li>Share your lists with others and explore showcases from other users shared to you.</li>
       </ul>
 
       <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto'/>

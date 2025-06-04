@@ -12,7 +12,7 @@ function Contact() {
     if (name === 'description') setDescription(value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let newErrors ={};
@@ -24,12 +24,33 @@ function Contact() {
       return;
     }
 
-    console.log('Email:', email);
-    console.log('Description:', description);
-    setSubmitted(true);
-    setEmail('');
-    setDescription('');
-    setErrors({});
+    try {
+      const res = await fetch('https://formspree.io/f/mvgrgoeq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          message: description
+        })
+      });
+
+      
+      if (res.ok) {
+        setSubmitted(true);
+        setEmail('');
+        setDescription('');
+        setErrors({});
+        
+        setTimeout(() => {
+          setSubmitted(false);
+        }, 5000);
+      } else {
+        throw new Error('Message failed to send');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrors({ description: 'Something went wrong. Try again later.' });
+    }
   };
 
   return (

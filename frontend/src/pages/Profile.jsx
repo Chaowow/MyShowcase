@@ -93,6 +93,10 @@ function Profile() {
         setIsEditing(false);
       } else if (response.status === 409) {
         setUsernameError('That username is already taken. Please choose another.');
+
+        setTimeout(() => {
+          setUsernameError('');
+        }, 4000)
       } else {
         console.error('Failed to update username');
       }
@@ -157,6 +161,13 @@ function Profile() {
       prev.includes(id) ? prev.filter((listId) => listId !== id) : [...prev, id]
     );
   };
+
+  const handleShareProfile = () => {
+    const shareUrl = `${window.location.origin}/user/${profile.username}`;
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => alert('Profile link copied to clipboard!'))
+      .catch(() => alert('Failed to copy link'));
+  }
 
   if (isLoading) return <p>Loading...</p>
   if (!isAuthenticated) return <p>Please log in to view your profile.</p>
@@ -254,6 +265,13 @@ function Profile() {
         <span className='text-indigo-300 font-semibold'>{profile?.views}</span> views ·
         <span className='text-pink-300 font-semibold ml-2'>{profile?.likes}</span> likes
       </p>
+
+      <button
+        onClick={handleShareProfile}
+        className='mt-4 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow'
+      >
+        Share Profile 🔗
+      </button>
 
       {pinnedLists.length > 0 && (
         <div className='mt-8'>
