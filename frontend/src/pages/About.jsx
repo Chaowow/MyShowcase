@@ -36,7 +36,7 @@ function About() {
       <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto'/>
 
       <div className='text-center'>
-        <p className='text-lg mb-6'>Ready to showcase your top favorites?</p>
+        <p className='text-lg mb-8'>Ready to showcase your top favorites?</p>
         <Link to='/create' className='bg-indigo-500 text-white px-4 py-3 rounded-md hover:bg-indigo-600 transition'>
           Get Started
         </Link>

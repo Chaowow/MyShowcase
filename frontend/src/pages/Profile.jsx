@@ -346,7 +346,7 @@ function Profile() {
       )}
 
       <div className='mt-8'>
-        <h3 className='text-xl font-semibold mb-2'>Other Lists</h3>
+        <h3 className='text-xl font-semibold mb-2'>Lists</h3>
 
         {otherLists.length == 0 ? (
           <p className='text-slate-400'>You haven't created any lists yet!</p>

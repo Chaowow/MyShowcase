@@ -47,6 +47,15 @@ function Header() {
             md:space-x-6 items-center text-lg'>
               <li>
                 <Link
+                to='/'
+                className='text-slate-300 hover:text-white'
+                onClick={toggleMenu}
+                >
+                  HOME
+                </Link>
+              </li>
+              <li>
+                <Link
                 to='about'
                 className='text-slate-300 hover:text-white'
                 onClick={toggleMenu}
@@ -63,7 +72,7 @@ function Header() {
                   CREATE
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link 
                 to='discover' 
                 className='text-slate-300 hover:text-white'
@@ -71,7 +80,7 @@ function Header() {
                 >
                   DISCOVER
                 </Link>
-              </li>
+              </li> */}
               
               {isAuthenticated ? (
                 <>
