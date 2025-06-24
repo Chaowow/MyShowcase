@@ -6,8 +6,9 @@ import useDebounce from '../hooks/useDebounce';
 import Modal from '../components/Modal';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import ConfirmationModal from '../components/ConfirmationModal';
-import placeholder from '../assets/placeholder.jpg'
+import placeholder from '../assets/placeholder.jpg';
 import { useAuth0 } from '@auth0/auth0-react';
+import toast from 'react-hot-toast';
 
 function Create() {
     const { user, isAuthenticated } = useAuth0();
@@ -181,6 +182,51 @@ function Create() {
 
         fetchUserLists();
     }, [isAuthenticated, user]);
+
+    useEffect(() => {
+        const migrateGuestLists = async () => {
+            if (isAuthenticated && user) {
+                const guestData = localStorage.getItem('guestLists');
+                if (!guestData) return;
+
+                const guestLists = JSON.parse(guestData);
+
+                try {
+                    for (const list of guestLists) {
+                        const response = await fetch('http://localhost:5000/lists', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                auth0_id: user.sub,
+                                title: list.title,
+                                items: list.items,
+                                description: list.description || ''
+                            })
+                        });
+
+                        if (!response.ok) {
+                            console.error(`Failed to migrate list: ${list.title}`);
+                        }
+                    }
+
+                    localStorage.removeItem('guestLists');
+
+                    const res = await fetch(`http://localhost:5000/lists/${user.sub}`);
+                    const userLists = await res.json();
+                    setUserList(userLists);
+
+                    toast.success('Your lists have been saved!');
+
+                    console.log('Guest lists successfully migrated!');
+                } catch (err) {
+                    console.error('Error migrating guest lists:', err);
+                    toast.error('Something went wrong saving your lists');
+                }
+            }
+        };
+
+        migrateGuestLists();
+    }, [isAuthenticated, user])
 
     const maxChar = 52;
 
