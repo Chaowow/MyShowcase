@@ -226,7 +226,40 @@ function Create() {
         };
 
         migrateGuestLists();
-    }, [isAuthenticated, user])
+    }, [isAuthenticated, user]);
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            const alreadyDismissed = localStorage.getItem('dismissedGuestBanner');
+            if (!alreadyDismissed) {
+                toast.custom((t) => (
+                    <div
+                        className={`bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3
+                            rounded shadow-md flex items-start justify-between w-full max-w-xl mx-auto mt-4 transition-all
+                            duration-300 ${t.visible ? 'opacity-100 trnaslate-y-0' : 'opacity-0 -translate-y-2'}`}
+                    >
+                        <div>
+                            <strong className='font-bold'>Guest Mode:</strong>
+                            <span className='block sm:inline ml-1'>
+                                You're not signed in. Sign up or log in to save your lists permanently.
+                            </span>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                localStorage.setItem('dismissedGuestBanner', 'true');
+                                toast.dismiss(t.id);
+                            }}
+                            className='ml-4 text-yellow-700 hover:text-yellow-900 font-bold text-lg'
+                            aria-label='Dismiss'
+                        >
+                            &times;
+                        </button>
+                    </div>
+                ), { duration: Infinity });
+            }
+        }
+    }, [isAuthenticated])
 
     const maxChar = 52;
 
