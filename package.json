@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
+    "@sentry/react": "^9.31.0",
     "react-hot-toast": "^2.5.2"
   }
 }

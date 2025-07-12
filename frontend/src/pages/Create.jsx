@@ -421,20 +421,27 @@ function Create() {
         const sourceIndex = result.source.index;
         const destinationIndex = result.destination.index;
 
-        setUserList((prevLists) =>
-            prevLists.map((list, i) => {
-                if (i !== listIndex) return list;
+        const updatedLists = userList.map((list, i) => {
+            if (i !== listIndex) return list;
 
-                const updatedItems = Array.from(list.items);
-                const [movedItem] = updatedItems.splice(sourceIndex, 1);
-                updatedItems.splice(destinationIndex, 0, movedItem);
+            const updatedItems = Array.from(list.items);
+            const [movedItem] = updatedItems.splice(sourceIndex, 1);
+            updatedItems.splice(destinationIndex, 0, movedItem);
 
-                const updatedList = { ...list, items: updatedItems };
+            const updatedList = { ...list, items: updatedItems };
+
+            if (isAuthenticated && user) {
                 updateListOnServer(updatedList);
+            }
 
-                return updatedList;
-            })
-        );
+            return updatedList
+       });
+
+        if (!isAuthenticated || !user) {
+            localStorage.setItem('guestList', JSON.stringify(updatedLists));
+       }
+
+       setUserList(updatedLists);
     };
 
     return (
@@ -494,7 +501,13 @@ function Create() {
                                                 );
 
                                                 setUserList(updatedLists);
-                                                updateListOnServer(updatedLists[index]);
+
+                                                if (isAuthenticated && user) {
+                                                    updateListOnServer(updatedLists[index]);
+                                                } else {
+                                                    localStorage.setItem('guestLists', JSON.stringify(updatedLists));
+                                                }
+
                                                 setIsEditing(null);
                                             }}
                                             className='bg-green-500 text-white px-4 py-3 rounded hover:bg-green-600'
@@ -545,14 +558,19 @@ function Create() {
                                                         setModalMessage(`Are you sure you want to delete the list: ${list.title}?`);
                                                         setModalAction(() => async () => {
                                                             try {
-                                                                const res = await fetch(`http://localhost:5000/lists/${list.id}`, {
-                                                                    method: 'DELETE'
-                                                                });
+                                                                if (isAuthenticated && user) {
+                                                                    const res = await fetch(`http://localhost:5000/lists/${list.id}`, {
+                                                                        method: 'DELETE'
+                                                                    });
 
-                                                                if (res.ok) {
-                                                                    setUserList((prevLists) => prevLists.filter((_, i) => i !== index));
-                                                                } else {
-                                                                    console.error('Failed to delete list');
+                                                                    if (!res.ok) throw new Error('Failed to delete list from server');
+                                                                }
+
+                                                                const updatedLists = userList.filter((_, i) => i !== index);
+                                                                setUserList(updatedLists);
+
+                                                                if (!isAuthenticated || !user) {
+                                                                    localStorage.setItem('guestLists', JSON.stringify(updatedLists));
                                                                 }
                                                             } catch (err) {
                                                                 console.error('Error deleting list:', err);
@@ -608,21 +626,32 @@ function Create() {
                                                                     <button
                                                                         onClick={() => {
                                                                             setModalMessage(`Are you sure you want to delete the item: ${item.title}?`);
-                                                                            setModalAction(() => () =>
-                                                                                setUserList((prevLists) =>
-                                                                                    prevLists.map((list, i) => {
+                                                                            setModalAction(() => () => {
+                                                                                setUserList((prevLists) => {
+                                                                                    const updatedLists = prevLists.map((list, i) => {
                                                                                         if (i === index) {
                                                                                             const updatedList = {
                                                                                                 ...list,
-                                                                                                items: list.items.filter((_, j) => j != itemIndex)
+                                                                                                items: list.items.filter((_, j) => j !== itemIndex),
                                                                                             };
-                                                                                            updateListOnServer(updatedList);
+
+                                                                                            if (isAuthenticated && user) {
+                                                                                                updateListOnServer(updatedList);
+                                                                                            } 
+
                                                                                             return updatedList;
                                                                                         }
+
                                                                                         return list;
-                                                                                    })
-                                                                                )
-                                                                            );
+                                                                                    });
+
+                                                                                    if (!isAuthenticated || !user) {
+                                                                                        localStorage.setItem('guestLists', JSON.stringify(updatedLists));
+                                                                                    }
+
+                                                                                    return updatedLists;
+                                                                                });
+                                                                            });
 
                                                                             setConfirmationModalOpen(true);
                                                                         }}

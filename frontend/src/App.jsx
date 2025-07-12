@@ -19,7 +19,7 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen bg-indigo-950">
         <Header />
-
+        
         <main className="flex-grow p-6">
           <Toaster position="top-center" reverseOrder={false} />
           <Routes>
