@@ -1,11 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import placeholder from '../assets/placeholder.jpg'
 import horrorList from '../assets/HorrorMovieList.png';
 import animeList from '../assets/AnimeList.png';
 import videoGameList from '../assets/videogameList.png';
 import demoGif from '../assets/ezgif-shareProfile.gif';
-
 
 function Home() {
   return (

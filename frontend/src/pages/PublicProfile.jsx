@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth0 } from '@auth0/auth0-react'
+import * as Sentry from '@sentry/react';
+import toast from 'react-hot-toast';;
 import placeholder from '../assets/placeholder.jpg'
 
 
@@ -14,52 +16,76 @@ function PublicProfile() {
   const [pinnedLists, setPinnedLists] = useState([]);
   const [otherLists, setOtherLists] = useState([]);
   const [expandedListIds, setExpandedListIds] = useState([]);
+  const [viewIncremented, setViewsIncremented] = useState(false);
+
+  const fetchUserData = async (username) => {
+  const res = await fetch(`http://localhost:5000/users/username/${username}`);
+  if (!res.ok) throw new Error('User not found');
+  return res.json();
+};
+
+  const fetchPinnedLists = async (auth0_id) => {
+  const res = await fetch(`http://localhost:5000/lists/pinned/${auth0_id}`);
+  if (!res.ok) throw new Error('Failed to fetch pinned lists');
+  return res.json();
+};
+
+  const fetchLists = async (auth0_id) => {
+  const res = await fetch(`http://localhost:5000/lists/${auth0_id}`);
+  if (!res.ok) throw new Error('Failed to fetch lists');
+  return res.json();
+};
+
+  const incrementProfileView = async (auth0_id) => {
+  const res = await fetch(`http://localhost:5000/users/${auth0_id}/views`, {
+    method: 'PATCH',
+  });
+  if (!res.ok) throw new Error('Failed to increment profile view count');
+};
+
+  const fetchLikeStatus = async (viewerId, profileId) => {
+  const res = await fetch(`http://localhost:5000/users/${viewerId}/likes/${profileId}`);
+  if (!res.ok) throw new Error('Failed to check like status');
+  return res.json();
+};
+
 
   useEffect(() => {
     const fetchPublicProfile = async () => {
       try {
-        const userRes = await fetch(`http://localhost:5000/users/username/${username}`);
-        if (!userRes.ok) {
-          console.error('User not found');
-          return;
-        }
-
-        const userData = await userRes.json();
+        const userData = await fetchUserData(username);
         setProfile(userData);
 
-        const pinnedRes = await fetch(`http://localhost:5000/lists/pinned/${userData.auth0_id}`);
-        const pinned = await pinnedRes.json();
+        const pinned = await fetchPinnedLists(userData.auth0_id);
         setPinnedLists(pinned)
 
-        if (user && user.sub !== userData.auth0_id) {
-          await fetch(`http://localhost:5000/users/${userData.auth0_id}/views`, {
-            method: 'PATCH'
-          });
+        const lists = await fetchLists(userData.auth0_id);
+        setLists(lists);
 
-          const likeCheckRes = await fetch(
-            `http://localhost:5000/users/${user.sub}/likes/${userData.auth0_id}`
-          );
-          const likeStatus = await likeCheckRes.json();
-          setHasLiked(likeStatus.liked);
-        }
-
-        const listRes = await fetch(`http://localhost:5000/lists/${userData.auth0_id}`);
-        const listData = await listRes.json();
-        setLists(listData);
-
-        const remaining = listData.filter(
+        const remaining = lists.filter(
           (list) => !pinned.some((p) => p.id === list.id)
         );
         setOtherLists(remaining);
+
+        if (user && user.sub !== userData.auth0_id && !viewIncremented) {
+
+          await incrementProfileView(userData.auth0_id);
+          setViewsIncremented(true);
+
+          const likeStatus = await fetchLikeStatus(user.sub, userData.auth0_id);
+          setHasLiked(likeStatus.liked);
+        }
+
       } catch (err) {
-        console.error('Error loading public profile:', err);
+        toast.error('Error loading profile.');
+        Sentry.captureException(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPublicProfile();
-  }, [username, user]);
+  }, [username, user, viewIncremented]);
 
   const formatJoinDate = (timestamp) => {
     const date = new Date(timestamp);
@@ -85,10 +111,11 @@ function PublicProfile() {
         setProfile(updatedUser);
         setHasLiked(!hasLiked);
       } else {
-        console.error('Failed to toggle like');
+        toast.error('Failed to toggle like.');
       }
     } catch (err) {
-      console.error('Error toggling like:', err);
+      toast.error('Error toggling like.');
+      Sentry.captureException(err);
     }
   };
 

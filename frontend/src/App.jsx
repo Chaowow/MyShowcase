@@ -8,7 +8,6 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Create from "./pages/Create";
-// import Discover from "./pages/Discover";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -25,7 +24,6 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/create" element={<Create />} />
-            {/* <Route path="/discover" element={<Discover />} /> */}
             <Route path="/profile" element={<Profile />} />
             <Route path="/user/:username" element={<PublicProfile />} />
             <Route path="/about" element={<About />} />

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Form from '../components/Form';
@@ -66,7 +67,7 @@ function Create() {
         };
     }, []);
 
-    const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+    const debouncedSearchQuery = useDebounce(searchQuery, 2000);
 
     // Fetch search results based on category and query
     const fetchResults = useCallback(
@@ -76,6 +77,7 @@ function Create() {
             if (cachedResults[cacheKey]) {
                 setSearchResults(cachedResults[cacheKey].results);
                 setTotalPages(cachedResults[cacheKey].totalPages);
+                setIsLoadingState(false);
                 return;
             }
             
@@ -134,8 +136,9 @@ function Create() {
                     ...prevCache,
                     [cacheKey]: { results, totalPages }
                 }));
-            } catch (error) {
-                console.error('Error fetching results', error.message);
+            } catch (err) {
+                toast.error('Error fetching results');
+                Sentry.captureException(err);
                 setSearchResults([]);
                 setTotalPages(0);
             } finally {
@@ -170,7 +173,8 @@ function Create() {
                     const data = await res.json();
                     setUserList(data);
                 } catch (err) {
-                    console.error('Error fetching user lists:', err);
+                    toast.error('Error fetching lists');
+                    Sentry.captureException(err);
                 }
             } else {
                 const guestLists = localStorage.getItem('guestLists');
@@ -205,7 +209,8 @@ function Create() {
                         });
 
                         if (!response.ok) {
-                            console.error(`Failed to migrate list: ${list.title}`);
+                            toast.error(`Failed to migrate list`);
+                            Sentry.captureException(`Failed to migrate list: ${list.title}`);
                         }
                     }
 
@@ -216,11 +221,9 @@ function Create() {
                     setUserList(userLists);
 
                     toast.success('Your lists have been saved!');
-
-                    console.log('Guest lists successfully migrated!');
                 } catch (err) {
-                    console.error('Error migrating guest lists:', err);
                     toast.error('Something went wrong saving your lists');
+                    Sentry.captureException('Error migrating guest lists:', err);
                 }
             }
         };
@@ -294,10 +297,12 @@ function Create() {
                     const savedList = await response.json();
                     setUserList([...userList, savedList]);
                 } else {
-                    console.error('Failed to save list');
+                    toast.error('Failed to save list');
+                    Sentry.captureException('Failed to save list');
                 }
             } catch (err) {
-                console.error('Error saving list:', err);
+                toast.error('Error saving list');
+                Sentry.captureException('Error saving list:', err);
             }
         } else {
             const updatedLists = [...userList, newList];
@@ -370,10 +375,14 @@ function Create() {
             });
 
             if (!response.ok) {
-                console.error('Failed to update list');
+                toast.error('Failed to update list');
+                Sentry.captureException(
+                    'Failed to update list due to unexpected server response.'
+                );
             }
         } catch (err) {
-            console.error('Error updating list:', err)
+            toast.error('Error updating list');
+            Sentry.captureException(err);
         }
     };
 
@@ -573,7 +582,8 @@ function Create() {
                                                                     localStorage.setItem('guestLists', JSON.stringify(updatedLists));
                                                                 }
                                                             } catch (err) {
-                                                                console.error('Error deleting list:', err);
+                                                                toast.error('Failed to delete list. Please try again.');
+                                                                Sentry.captureException(err);
                                                             }
                                                         });
 
@@ -737,7 +747,7 @@ function Create() {
                 totalPages={totalPages}
                 setCurrentPage={setCurrentPage}
                 selectedCategory={selectedCategory}
-                isLoadingState={isLoadingState}
+                isLoading={isLoadingState}
             />
 
             {isButtonVisible && (

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import * as Sentry from '@sentry/react';
+import toast from 'react-hot-toast';
 import placeholder from '../assets/placeholder.jpg'
 import monkey from '../assets/Monkey.png';
 import cat from '../assets/Cat.png';
@@ -19,40 +21,59 @@ function Profile() {
   const [otherLists, setOtherLists] = useState([]);
   const [expandedListIds, setExpandedListIds] = useState([]);
 
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const fetchData = async () => {
-        try {
-          const response = await fetch('http://localhost:5000/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              auth0_id: user.sub,
-              username: user.nickname || user.name,
-              email: user.email
-            })
-          });
+  const createOrGetUser = async (user) => {
+    const res = await fetch('http://localhost:5000/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        auth0_id: user.sub,
+        username: user.nickname || user.name,
+        email: user.email
+      })
+    });
 
-          const data = await response.json();
+    if (!res.ok) throw new Error('Failed to create or fetch user');
+    return res.json();
+  };
+
+  const fetchUserLists = async (auth0_id) => {
+    const res = await fetch(`http://localhost:5000/lists/${auth0_id}`);
+    if (!res.ok) throw new Error('Failed to fetch lists');
+    return res.json();
+  };
+
+  const fetchPinnedLists = async (auth0_id) => {
+    const res = await fetch(`http://localhost:5000/lists/pinned/${auth0_id}`);
+    if (!res.ok) throw new Error('Failed to fetch pinned lists');
+    return res.json();
+  };
+
+  useEffect(() => {
+      const fetchProfileData = async () => {
+        try {
+          const data = await createOrGetUser(user);
           setProfile(data)
 
-          const allRes = await fetch(`http://localhost:5000/lists/${data.auth0_id}`);
-          const allLists = await allRes.json();
+          const [allLists, pinned] = await Promise.all([
+            fetchUserLists(data.auth0_id),
+            fetchPinnedLists(data.auth0_id)
+          ]);
 
-          const pinnedRes = await fetch(`http://localhost:5000/lists/pinned/${data.auth0_id}`);
-          const pinned = await pinnedRes.json();
           setPinnedLists(pinned);
 
           const remaining = allLists.filter(
             (list) => !pinned.some((p) => p.id === list.id)
           );
           setOtherLists(remaining);
-        } catch (error) {
-          console.error('Error:', error);
+
+        } catch (err) {
+          toast.error('Something went wrong. Please try again later.');
+          Sentry.captureException(err);
         }
       };
 
-      fetchData();
+    if (isAuthenticated && user) {
+      fetchProfileData();
     }
   }, [isAuthenticated, user]);
 
@@ -98,11 +119,11 @@ function Profile() {
           setUsernameError('');
         }, 4000)
       } else {
-        console.error('Failed to update username');
+        toast.error('Failed to update username.');
       }
     } catch (err) {
-      console.error('Error updating username:', err);
-      setUsernameError('An unexpected error occured. Please try again later.');
+      toast.error('An unexpected error occured. Please try again later');
+      Sentry.captureException(err);
     }
   };
 
@@ -119,10 +140,11 @@ function Profile() {
         setProfile(updated);
         setIsSelectingAvatar(false);
       } else {
-        console.error('Failed to update profile picture');
+        toast.error('Failed to update profile picture.');
       }
     } catch (err) {
-      console.error('Error updating profile picture:', err);
+      toast.error('Error updating profile picture');
+      Sentry.captureException(err);
     }
   };
 
@@ -139,7 +161,8 @@ function Profile() {
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error);
+        toast.error("Failed to pin/unpin list.");
+        Sentry.captureException(err);
         return;
       }
 
@@ -152,7 +175,8 @@ function Profile() {
       const rest = all.filter((list) => !pinned.some((p) => p.id === list.id));
       setOtherLists(rest);
     } catch (err) {
-      console.error('Error toggling pin:', err);
+      toast.error('Error toggling pin');
+      Sentry.captureException(err);
     }
   };
 
@@ -165,9 +189,9 @@ function Profile() {
   const handleShareProfile = () => {
     const shareUrl = `${window.location.origin}/user/${profile.username}`;
     navigator.clipboard.writeText(shareUrl)
-      .then(() => alert('Profile link copied to clipboard!'))
-      .catch(() => alert('Failed to copy link'));
-  }
+      .then(() => toast.success('Profile link copied to clipboard!'))
+      .catch(() => toast.error('Failed to copy link'));
+  };
 
   if (isLoading) return <p>Loading...</p>
   if (!isAuthenticated) return <p>Please log in to view your profile.</p>

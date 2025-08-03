@@ -8,7 +8,7 @@ function About() {
         About MyTopShowcase
       </h1>
 
-      <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto'/>
+      <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto' />
 
       <h2 className='text-2xl font-semibold text-center mb-4'>
         Why MyTopShowcase?
@@ -21,7 +21,7 @@ function About() {
         Whether it's movies, TV shows, books, or video games, our goal is to create a space where users can visually showcase their favorites.
       </p>
 
-      <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto'/>
+      <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto' />
 
       <h2 className='text-2xl font-semibold text-center mb-4'>
         How It Works
@@ -33,7 +33,7 @@ function About() {
         <li>Share your lists with others and explore showcases from other users shared to you.</li>
       </ul>
 
-      <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto'/>
+      <hr className='border-t border-indigo-500 my-8 w-3/4 mx-auto' />
 
       <div className='text-center'>
         <p className='text-lg mb-8'>Ready to showcase your top favorites?</p>
