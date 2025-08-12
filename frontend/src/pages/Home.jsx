@@ -25,7 +25,7 @@ function Home() {
         </p>
 
         <Link to="create">
-          <button className='bg-indigo-500 text-white px-6 py-3
+          <button className='bg-indigo-600 text-white px-6 py-3
           rounded-lg text-lg md:text-xl hover:bg-indigo-600'>
             Get Started!
           </button>
@@ -115,7 +115,7 @@ function Home() {
         </h2>
 
         <Link to='create'>
-          <button className='bg-indigo-500 text-white px-6 py-3 rounded-lg
+          <button className='bg-indigo-600 text-white px-6 py-3 rounded-lg
           text-lg md:text-xl hover:bg-indigo-600'>
             Start Creating!
           </button>

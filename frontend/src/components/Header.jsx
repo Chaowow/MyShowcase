@@ -92,7 +92,7 @@ function Header() {
                   <li>
                     <button
                       onClick={() => logout({ returnTo: window.location.origin })}
-                      className='bg-violet-500 text-white px-4 py-2 rounded hover:bg-violet-600 transition'
+                      className='bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-600 transition'
                     >
                       LOG OUT
                     </button>
@@ -102,7 +102,7 @@ function Header() {
                 <li>
                   <button
                     onClick={() => loginWithRedirect()}
-                    className='bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition'
+                    className='bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-600 transition'
                   >
                     LOG IN
                   </button>
