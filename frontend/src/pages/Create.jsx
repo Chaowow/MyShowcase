@@ -80,7 +80,7 @@ function Create() {
                 setIsLoadingState(false);
                 return;
             }
-            
+
             const categoryConfig = {
                 movies: {
                     url: 'http://localhost:5000/api/tmdb',
@@ -108,7 +108,7 @@ function Create() {
                 },
                 videoGames: {
                     url: 'http://localhost:5000/api/rawg',
-                    params: { query, page: paginationKey},
+                    params: { query, page: paginationKey },
                     processResponse: (data) => {
                         return {
                             results: data.results,
@@ -117,7 +117,7 @@ function Create() {
                     }
                 }
             };
-            
+
 
             const config = categoryConfig[selectedCategory];
             if (!config) return;
@@ -126,7 +126,7 @@ function Create() {
 
             try {
                 const response = await axios.get(config.url, { params: config.params });
-                
+
                 const { results = [], totalPages = 0 } = config.processResponse(response.data);
 
                 setSearchResults(results);
@@ -335,7 +335,7 @@ function Create() {
                         : 'Platforms not available'
                     : null,
             image: item.poster_path
-                ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
+                ? `https://image.tmdb.org/t/p/w200${item.poster_path}`
                 : item.volumeInfo?.imageLinks?.thumbnail
                 || item.background_image
                 || placeholder,
@@ -444,19 +444,19 @@ function Create() {
             }
 
             return updatedList
-       });
+        });
 
         if (!isAuthenticated || !user) {
             localStorage.setItem('guestList', JSON.stringify(updatedLists));
-       }
+        }
 
-       setUserList(updatedLists);
+        setUserList(updatedLists);
     };
 
     return (
         <div className='bg-indigo-950 p-6 min-h-screen overflow-x-hidden'>
-            <button className='bg-indigo-500 text-white mb-4 px-4 py-2
-            rounded' onClick={openForm}>
+            <button className='bg-indigo-600 text-white mb-4 px-4 py-2
+            rounded hover:bg-indigo-700' onClick={openForm}>
                 CREATE NEW LIST
             </button>
 
@@ -519,13 +519,13 @@ function Create() {
 
                                                 setIsEditing(null);
                                             }}
-                                            className='bg-green-500 text-white px-4 py-3 rounded hover:bg-green-600'
+                                            className='bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700'
                                         >
                                             Save
                                         </button>
                                         <button
                                             onClick={() => setIsEditing(null)}
-                                            className='bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600'
+                                            className='bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700'
                                         >
                                             Cancel
                                         </button>
@@ -538,14 +538,13 @@ function Create() {
                                         {list.title}
                                     </h4>
 
-                                    <div className='flex space-x-2'>
+                                    <div className='flex space-x-3'>
                                         <button
                                             onClick={() => setCollapsedLists((prev) => ({
                                                 ...prev,
                                                 [index]: !prev[index]
                                             }))}
-                                            className='bg-blue-500 text-white px-2 py-1.5 rounded hover:bg-blue-600'
-                                        >
+                                            className='bg-blue-600 text-white px-2 py-1.5 rounded hover:bg-blue-700'>
                                             {collapsedLists[index] ? '+' : '-'}
                                         </button>
 
@@ -557,7 +556,7 @@ function Create() {
                                                         setTempTitle(list.title);
                                                         setTempDescription(list.description);
                                                     }}
-                                                    className='bg-blue-500 text-white px-2 py-1.5 rounded hover:bg-blue-600'
+                                                    className='bg-blue-600 text-white px-2 py-1.5 rounded hover:bg-blue-700'
                                                 >
                                                     Edit
                                                 </button>
@@ -589,7 +588,7 @@ function Create() {
 
                                                         setConfirmationModalOpen(true);
                                                     }}
-                                                    className='bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-600'
+                                                    className='bg-red-600 text-white px-2 py-1.5 rounded hover:bg-red-700'
                                                 >
                                                     Delete
                                                 </button>
@@ -647,7 +646,7 @@ function Create() {
 
                                                                                             if (isAuthenticated && user) {
                                                                                                 updateListOnServer(updatedList);
-                                                                                            } 
+                                                                                            }
 
                                                                                             return updatedList;
                                                                                         }
@@ -665,7 +664,7 @@ function Create() {
 
                                                                             setConfirmationModalOpen(true);
                                                                         }}
-                                                                        className='absolute py-2 top-2 right-2 sm:w-4 sm:h-4 md:w-5 md:h-5 flex items-center justify-center 
+                                                                        className='absolute py-2 top-2 right-2 sm:w-4 sm:h-4 md:w-6 md:h-6 inline-flex items-center justify-center 
                                                                       bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
                                                                         aria-label={`Delete ${item.title}`}
                                                                     >
@@ -687,6 +686,7 @@ function Create() {
                                                                     </p>
 
                                                                     <img
+                                                                        loading='lazy'
                                                                         src={item.image || placeholder}
                                                                         alt={item.title}
                                                                         className='w-36 sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-80 
@@ -721,8 +721,8 @@ function Create() {
                         }}
                         className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded whitespace-nowrap
                         ${selectedCategory === category.id
-                                ? 'bg-indigo-500 text-white'
-                                : 'bg-indigo-200 text-indigo-600 border border-indigo-500'
+                                ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                : 'bg-indigo-100 text-indigo-700 border border-indigo-300 hover:bg-indigo-200'
                             }`}
                     >
                         {category.label}
