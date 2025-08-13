@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv'); 
 const axios = require('axios'); 
 const pool = require('./db');
+const { toHttps, normalizeGoogleBook } = require('./utils/toHttps');
 const cors = require('cors'); // Import CORS for cross-origin requests
 const NodeCache = require('node-cache'); // Import NodeCache for caching
 const apiCaller = require('./utils/apiCaller'); // Custom utility for API calls
@@ -118,7 +119,7 @@ app.get('/api/books', cacheMiddleware, async (req, res) => {
     try {
         const data = await apiCaller('https://www.googleapis.com/books/v1/volumes', params); // Fetch data from Google Books API
 
-        const results = data.items || [];
+        const results = (data.items || []).map(normalizeGoogleBook);
         const totalItems = data.totalItems || 0;
         const totalPages = Math.ceil(totalItems / itemsPerPage);
 

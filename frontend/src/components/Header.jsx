@@ -5,7 +5,6 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAuth = false;
 
   const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
 

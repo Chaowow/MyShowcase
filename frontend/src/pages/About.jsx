@@ -37,8 +37,11 @@ function About() {
 
       <div className='text-center'>
         <p className='text-lg mb-8'>Ready to showcase your top favorites?</p>
-        <Link to='/create' className='bg-indigo-500 text-white px-4 py-3 rounded-md hover:bg-indigo-600 transition'>
-          Get Started
+        <Link to='/create'>
+          <button className='bg-indigo-600 text-white px-4 py-3 rounded-md
+         hover:bg-indigo-700 hover:text-slate-200 transition'>
+            Get Started
+          </button>
         </Link>
       </div>
     </div>

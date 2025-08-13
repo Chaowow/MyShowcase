@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import horrorList from '../assets/HorrorMovieList.png';
-import animeList from '../assets/AnimeList.png';
-import videoGameList from '../assets/videogameList.png';
-import demoGif from '../assets/ezgif-shareProfile.gif';
+import horrorList from '../assets/HorrorMovieList.webp';
+import animeList from '../assets/AnimeList.webp';
+import videoGameList from '../assets/videogameList.webp';
+import shareProfile from '../assets/shareProfile.webm';
 
 function Home() {
   return (
@@ -17,16 +17,16 @@ function Home() {
          text-white mb-8'>
           Welcome to MyTopShowcase!
         </h1>
-        
+
         <p className='text-lg md:text-2xl max-w-xl mb-8'>
-          Create and share lists of your favorite things — from movies and 
-          TV shows to books and video games. Build it, personalize it, and 
+          Create and share lists of your favorite things — from movies and
+          TV shows to books and video games. Build it, personalize it, and
           show it off!
         </p>
 
         <Link to="create">
           <button className='bg-indigo-600 text-white px-6 py-3
-          rounded-lg text-lg md:text-xl hover:bg-indigo-600'>
+          rounded-lg text-lg md:text-xl hover:bg-indigo-700'>
             Get Started!
           </button>
         </Link>
@@ -35,16 +35,37 @@ function Home() {
 
       {/* Images */}
       <section className='flex flex-col sm:flex-row sm:flex-wrap justify-center gap-4 mb-8'>
-        
-        <img src={horrorList} alt='Horror List' 
-        className='w-full max-w-[900px] h-auto border-2 border-slate-200 object-cover rounded-lg shadow-lg'/>
 
-        <img src={animeList} alt='Anime List' 
-        className='w-full max-w-[900px] h-auto border-2 border-slate-200 object-cover rounded-lg shadow-lg'/>
+        <img
+          src={horrorList}
+          alt='Horror List'
+          width='900'
+          height='506'
+          className='w-full max-w-[900px] h-auto border-2 border-slate-200 object-cover rounded-lg shadow-lg'
+          loading='lazy'
+          decoding='async'
+        />
 
-        <img src={videoGameList} alt='Video Game List' 
-        className='w-full max-w-[900px] h-auto border-2 border-slate-200 object-cover rounded-lg shadow-lg'/>
-        
+        <img
+          src={animeList}
+          alt='Anime List'
+          width='900'
+          height='506'
+          className='w-full max-w-[900px] h-auto border-2 border-slate-200 object-cover rounded-lg shadow-lg'
+          loading='lazy'
+          decoding='async'
+        />
+
+        <img
+          src={videoGameList}
+          alt='Video Game List'
+          width='900'
+          height='506'
+          className='w-full max-w-[900px] h-auto border-2 border-slate-200 object-cover rounded-lg shadow-lg'
+          loading='lazy'
+          decoding='async'
+        />
+
       </section>
 
       {/* Feature Overview */}
@@ -55,46 +76,27 @@ function Home() {
         </h2>
 
         <p className='text-lg md:text-xl max-w-3xl'>
-          With MyTopShowcase, you can create as many lists as you want — as broad 
-          or as niche as you like. Show off your favorites, keep track of them, 
+          With MyTopShowcase, you can create as many lists as you want — as broad
+          or as niche as you like. Show off your favorites, keep track of them,
           and add personal notes or descriptions for each list!
         </p>
 
       </section>
 
-      {/* Discover Section */}
-      {/* <section className='flex flex-col items-center py-12 px-4 text-center
-      bg-indigo-900'>
-
-        <div className="flex flex-wrap justify-center space-x-4 
-        space-y-4 mb-12 sm:space-y-0 sm:space-x-8">
-          <img src={placeholder} alt="placeholder" 
-          className="w-40 sm:w-48 h-60 sm:h-80 object-cover rounded-lg shadow-lg" />
-
-          <img src={placeholder} alt="placeholder"
-           className="w-40 sm:w-48 h-60 sm:h-80 object-cover rounded-lg shadow-lg" />
-
-          <img src={placeholder} alt="placeholder" 
-          className="w-40 sm:w-48 h-60 sm:h-80 object-cover rounded-lg shadow-lg" />
-        </div>
-
-        <h2 className='text-2xl md:text-4xl font-semibold text-white mb-6'>
-          Discover New Favorites
-        </h2>
-
-        <p className='text-lg md:text-xl max-w-3xl mb-12'>
-          Look at the favorites of other users, and find inspiration from
-          trending and popular picks. With tailored suggestions, you may
-          discover your next favorite thing!
-        </p>
-
-      </section> */}
-
       {/* Sharing Section */}
       <section className='flex flex-col items-center py-12 px-4 text-center bg-indigo-900'>
 
-        <img src={demoGif} alt='Animated demo showing a user sharing their profile on MyTopShowcase'
-          className='w-64 h-auto rounded-lg shadow-lg mb-6' />
+        <video
+          className="w-64 h-auto rounded-lg shadow-lg mb-6"
+          autoPlay
+          muted
+          loop
+          playsInline
+          width="256"
+          height="256"
+        >
+          <source src={shareProfile} type="video/webm" />
+        </video>
 
         <h2 className='text-2xl md:text-4xl font-semibold text-white mb-6'>
           Connect and Share
@@ -116,7 +118,7 @@ function Home() {
 
         <Link to='create'>
           <button className='bg-indigo-600 text-white px-6 py-3 rounded-lg
-          text-lg md:text-xl hover:bg-indigo-600'>
+          text-lg md:text-xl hover:bg-indigo-700'>
             Start Creating!
           </button>
         </Link>
