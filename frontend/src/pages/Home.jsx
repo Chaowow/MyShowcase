@@ -88,9 +88,8 @@ function Home() {
 
         <video
           className="w-64 h-auto rounded-lg shadow-lg mb-6"
-          autoPlay
+          preload='none'
           muted
-          loop
           playsInline
           width="256"
           height="256"

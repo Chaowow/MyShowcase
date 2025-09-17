@@ -477,11 +477,12 @@ function Create() {
 
                     <div key={index} className='bg-indigo-900 p-6 mb-6 rounded-lg shadow-lg'>
 
-                        <div className='flex justify-between items-center mb-2'>
+                        <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2'>
 
                             {isEditing === index ? (
                                 <div className='w-full'>
                                     <input
+                                        id='edit-title-input'
                                         type='text'
                                         value={tempTitle}
                                         onChange={(e) => {
@@ -534,7 +535,7 @@ function Create() {
                             ) : (
                                 <>
                                     <h4 className='text-2xl sm:text-3xl font-bold text-slate-100 
-                                    break-words whitespace-normal'>
+                                    break-words whitespace-normal max-w-[90%] sm:max-w-[70%]'>
                                         {list.title}
                                     </h4>
 
@@ -556,7 +557,7 @@ function Create() {
                                                         setTempTitle(list.title);
                                                         setTempDescription(list.description);
                                                     }}
-                                                    className='bg-blue-600 text-white px-2 py-1.5 rounded hover:bg-blue-700'
+                                                    className='bg-blue-600 text-white px-2 py-1 text-xs sm:text-sm rounded hover:bg-blue-700'
                                                 >
                                                     Edit
                                                 </button>
@@ -588,7 +589,7 @@ function Create() {
 
                                                         setConfirmationModalOpen(true);
                                                     }}
-                                                    className='bg-red-600 text-white px-2 py-1.5 rounded hover:bg-red-700'
+                                                    className='bg-red-600 text-white px-2 py-1 text-xs sm:text-sm rounded hover:bg-red-700'
                                                 >
                                                     Delete
                                                 </button>
@@ -664,11 +665,13 @@ function Create() {
 
                                                                             setConfirmationModalOpen(true);
                                                                         }}
-                                                                        className='absolute py-2 top-2 right-2 sm:w-4 sm:h-4 md:w-6 md:h-6 inline-flex items-center justify-center 
-                                                                      bg-indigo-100 rounded-full hover:bg-indigo-300/50 shadow transition duration-200 ease-in-out'
+                                                                        className='absolute top-2 right-2 w-6 h-6 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center
+                                                                        justify-center text-sm bg-indigo-100 rounded-full hover:bg-indigo-300/50 
+                                                                        shadow transition duration-200 ease-in-out'
                                                                         aria-label={`Delete ${item.title}`}
                                                                     >
                                                                         &times;
+                                                                        <span className='sr-only'>Delete item</span>
                                                                     </button>
 
 
@@ -732,6 +735,7 @@ function Create() {
 
             {/* Search Input */}
             <input
+                id='search-input'
                 type='text'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -753,7 +757,7 @@ function Create() {
             {isButtonVisible && (
                 <button
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className='fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-indigo-500
+                    className='fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-indigo-600
                   text-white px-4 py-2 rounded shadow-md'
                 >
                     Scroll-to-Top

@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-const ImageWithSkeleton = ({ src, alt, className, skeletonClass }) => {
+const ImageWithSkeleton = ({ 
+    src, 
+    alt, 
+    className, 
+    skeletonClass,
+    loading = 'lazy',
+    referrerPolicy='no-referrer' 
+}) => {
     const [loaded, setLoaded] = useState(false);
 
     return (
@@ -16,6 +23,8 @@ const ImageWithSkeleton = ({ src, alt, className, skeletonClass }) => {
             <img
                 src={src}
                 alt={alt}
+                loading={loading}
+                referrerPolicy={referrerPolicy}
                 className={`w-full h-full object-contain transition-opacity duration-300
                     ease-in-out rounded ${loaded ? 'opacity-100' : 'opacity-0'}`}
                 onLoad={() => setLoaded(true)}

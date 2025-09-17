@@ -9,7 +9,7 @@ const MediaCard = ({
     description,
     platforms,
     onAdd,
-    imageClassName = 'w-32 sm:w-40 md:w-64 h-44 sm:h-60 md:h-64 lg:h-72 mb-2 rounded'
+    imageClassName = 'sm:w-48 md:w-64 lg:w-full h-48 sm:h-64 md:h-72 lg:h-80 object-contain mb-4 rounded'
 }) => {
     return (
         <div className='bg-indigo-900/75 sm:p-6 rounded shadow flex flex-col items-center text-center'>
@@ -19,6 +19,8 @@ const MediaCard = ({
                     alt={alt}
                     className={imageClassName}
                     skeletonClass='bg-slate-600'
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
                 />
             )}
 
