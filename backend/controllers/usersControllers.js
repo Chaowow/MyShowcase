@@ -150,6 +150,10 @@ const updateUsername = async (req, res) => {
     const { auth0_id } = req.params;
     const { username } = req.body;
 
+    if (!username || username.length > 20) {
+        return res.status(400).json({ error: 'Username must be 1-20 characters long.' });
+    }
+
     try {
         const result = await pool.query(
             'UPDATE users SET username = $1 WHERE auth0_id = $2 RETURNING *',
@@ -176,7 +180,10 @@ const getUserByUsername = async (req, res) => {
     const { username } = req.params;
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const result = await pool.query(
+            'SELECT * FROM users WHERE LOWER(username) = LOWER($1)', 
+            [username]
+        );
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });

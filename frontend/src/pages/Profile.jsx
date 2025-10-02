@@ -20,6 +20,7 @@ function Profile() {
   const [pinnedLists, setPinnedLists] = useState([]);
   const [otherLists, setOtherLists] = useState([]);
   const [expandedListIds, setExpandedListIds] = useState([]);
+  const [loadingLists, setLoadingLists] = useState(true);
 
   const createOrGetUser = async (user) => {
     const res = await fetch('http://localhost:5000/users', {
@@ -49,28 +50,30 @@ function Profile() {
   };
 
   useEffect(() => {
-      const fetchProfileData = async () => {
-        try {
-          const data = await createOrGetUser(user);
-          setProfile(data)
+    const fetchProfileData = async () => {
+      try {
+        const data = await createOrGetUser(user);
+        setProfile(data)
 
-          const [allLists, pinned] = await Promise.all([
-            fetchUserLists(data.auth0_id),
-            fetchPinnedLists(data.auth0_id)
-          ]);
+        const [allLists, pinned] = await Promise.all([
+          fetchUserLists(data.auth0_id),
+          fetchPinnedLists(data.auth0_id)
+        ]);
 
-          setPinnedLists(pinned);
+        setPinnedLists(pinned);
 
-          const remaining = allLists.filter(
-            (list) => !pinned.some((p) => p.id === list.id)
-          );
-          setOtherLists(remaining);
+        const remaining = allLists.filter(
+          (list) => !pinned.some((p) => p.id === list.id)
+        );
+        setOtherLists(remaining);
 
-        } catch (err) {
-          toast.error('Something went wrong. Please try again later.');
-          Sentry.captureException(err);
-        }
-      };
+      } catch (err) {
+        toast.error('Something went wrong. Please try again later.');
+        Sentry.captureException(err);
+      } finally {
+        setLoadingLists(false);
+      }
+    };
 
     if (isAuthenticated && user) {
       fetchProfileData();
@@ -101,6 +104,14 @@ function Profile() {
 
   const handleSaveUsername = async () => {
     setUsernameError('');
+
+    const value = newUsername?.trim() || '';
+
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(value)) {
+      toast.error('Username must be 3–20 characters (letters, numbers, underscores).');
+      return;
+    }
+
     try {
       const response = await fetch(`http://localhost:5000/users/${profile.auth0_id}/username`, {
         method: 'PATCH',
@@ -181,7 +192,7 @@ function Profile() {
   };
 
   const toggleDescription = (id) => {
-    setExpandedListIds((prev) => 
+    setExpandedListIds((prev) =>
       prev.includes(id) ? prev.filter((listId) => listId !== id) : [...prev, id]
     );
   };
@@ -200,7 +211,7 @@ function Profile() {
   return (
     <div className='bg-indigo-950 p-6 text-white'>
 
-       {usernameError && <p className='text-red-400 text-sm mb-4'>{usernameError}</p>}
+      {usernameError && <p className='text-red-400 text-sm mb-4'>{usernameError}</p>}
       <div className='flex items-center gap-4 mb-2'>
         {isEditing ? (
           <>
@@ -208,6 +219,7 @@ function Profile() {
               type='text'
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
+              maxLength={20}
               className='text-black px-2 py-1 rounded'
             />
             <button
@@ -232,7 +244,7 @@ function Profile() {
                   setIsEditing(true);
                   setNewUsername(profile?.username || '');
                 }}
-                className='bg-indigo-500 hover:bg-indigo-600 px-2 py-1 mt-2 rounded text-sm'
+                className='bg-indigo-600 hover:bg-indigo-700 px-2 py-1 mt-2 rounded text-sm'
               >
                 Edit
               </button>
@@ -297,21 +309,35 @@ function Profile() {
         Share Profile 🔗
       </button>
 
-      {pinnedLists.length > 0 && (
-        <div className='mt-8'>
-          <h3 className='text-xl font-semibold mb-2 text-yellow-300'>⭐ Pinned Lists</h3>
-          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-2 text-slate-200">📌 Pinned Lists</h3>
+
+        {loadingLists ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px]">
+            {[...Array(3)].map((_, i) => (
+              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse h-[220px]" />
+            ))}
+          </ul>
+
+        ) : pinnedLists.length > 0 ? (
+
+          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px]'>
             {pinnedLists.map((list) => (
-              <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
-                <div className='flex justify-between items-center mb-4'>
-                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+              <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow min-w-0'>
+                <div className='flex justify-between items-center gap-3 mb-4'>
+                  <h4 className='flex-1 min-w-0 text-xl font-bold mb-2 text-white line-clamp-2 break-words [hyphens:auto]'>
+                    {list.title}
+                  </h4>
                   <button
                     onClick={() => handleTogglePin(list.id)}
-                    className='mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded'
+                    className='shrink-0 mt-2 bg-slate-300 hover:bg-slate-400 text-indigo-900 
+                    px-3 py-1 rounded border border-slate-400'
+                    aria-label={`Unpin ${list.title}`}
                   >
                     Unpin 📌
                   </button>
                 </div>
+
                 <div className='space-y-4'>
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
@@ -319,10 +345,14 @@ function Profile() {
                         src={list.items[0].image || placeholder}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
+                        width='96'
+                        height='128'
+                        loading='lazy'
+                        decoding='async'
                       />
                       <div className='flex flex-col justify-center'>
                         <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
-                        <p className='text-sm text-slate-400'>#1 Pick</p>
+                        <p className='text-sm text-slate-300'>#1 Pick</p>
                       </div>
                     </div>
                   )}
@@ -334,8 +364,14 @@ function Profile() {
                           src={item.image || placeholder}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
+                          width='320'
+                          height='128'
+                          loading='lazy'
+                          decoding='async'
                         />
-                        <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                        <p className='text-white font-semibold text-sm text-center line-clamp-2 break-words [hyphens:auto]'>
+                          {item.title}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -345,7 +381,7 @@ function Profile() {
                   <>
                     <button
                       onClick={() => toggleDescription(list.id)}
-                      className='text-sm mt-2 text-indigo-300 hover:underline'
+                      className='text-sm mt-2 text-indigo-200 hover:underline'
                     >
                       {expandedListIds.includes(list.id) ? 'Hide Description' : 'Show Description'}
                     </button>
@@ -356,7 +392,7 @@ function Profile() {
                   </>
                 )}
 
-                <p className='text-sm text-slate-400 mt-4'>
+                <p className='text-sm text-slate-300 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -366,24 +402,42 @@ function Profile() {
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        ) : (
+          <div className='min-h-[260px] bg-indigo-900/40 rounded-lg grid place-items-center'>
+            <p className='text-slate-300'>No pinned lists yet.</p>
+          </div>
+        )}
+      </div>
 
       <div className='mt-8'>
         <h3 className='text-xl font-semibold mb-2'>Lists</h3>
 
-        {otherLists.length == 0 ? (
-          <p className='text-slate-400'>You haven't created any lists yet!</p>
+        {loadingLists ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[600px]">
+            {[...Array(6)].map((_, i) => (
+              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse h-[220px]" />
+            ))}
+          </ul>
+        ) : otherLists.length == 0 ? (
+          <div className='min-h-[600px] bg-indigo-900/40 rounded-lg grid place-items-center text-center p-6'>
+            <div>
+              <p className='text-slate-300 mb-2'>You haven't created any lists yet.</p>
+              <p className='text-slate-300 text-sm'>Start your first list from the Create page!</p>
+            </div>
+          </div>
         ) : (
-          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[600px]'>
             {otherLists.map((list) => (
-              <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
-                <div className='flex justify-between items-center mb-4'>
-                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+              <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow min-w-0'>
+                <div className='flex justify-between items-center mb-4 gap-3'>
+                  <h4 className='flex-1 min-w-0 text-xl font-bold mb-2 text-white line-clamp-2 break-words [hyphens:auto]'>
+                    {list.title}
+                  </h4>
                   {pinnedLists.length < 3 && (
                     <button
                       onClick={() => handleTogglePin(list.id)}
-                      className='mt-2 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded'
+                      className='shrink-0 mt-2 bg-slate-300 hover:bg-slate-400 text-indigo-900 px-3 py-1 rounded border border-slate-400'
+                      aria-label={`Pin ${list.title}`}
                     >
                       Pin 📌
                     </button>
@@ -397,33 +451,45 @@ function Profile() {
                         src={list.items[0].image || placeholder}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
+                        width="96"
+                        height="128"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className='flex flex-col justify-center'>
-                        <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
-                        <p className='text-sm text-slate-400'>#1 Pick</p>
+                        <p className='text-white font-bold text-lg line-clamp-2 break-words [hyphens:auto]'>
+                          {list.items[0].title}
+                        </p>
+                        <p className='text-sm text-slate-300'>#1 Pick</p>
                       </div>
                     </div>
                   )}
 
                   <div className='grid grid-cols-2 gap-4'>
                     {list.items.slice(1).map((item, index) => (
-                      <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                      <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow min-w-0'>
                         <img
                           src={item.image || placeholder}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
+                          width="320"
+                          height="128"
+                          loading="lazy"
+                          decoding="async"
                         />
-                        <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
+                        <p className='text-white font-semibold text-sm text-center line-clamp-2 break-words [hyphens:auto]'>
+                          {item.title}
+                        </p>
                       </div>
                     ))}
                   </div>
                 </div>
-                
+
                 {list.description && (
                   <>
                     <button
                       onClick={() => toggleDescription(list.id)}
-                      className='text-sm mt-2 text-indigo-300 hover:underline'
+                      className='text-sm mt-2 text-indigo-200 hover:underline'
                     >
                       {expandedListIds.includes(list.id) ? 'Hide Description' : 'Show Description'}
                     </button>
@@ -434,7 +500,7 @@ function Profile() {
                   </>
                 )}
 
-                <p className='text-sm text-slate-400 mt-4'>
+                <p className='text-sm text-slate-300 mt-4'>
                   Created on {new Date(list.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -446,7 +512,7 @@ function Profile() {
           </ul>
         )}
       </div>
-    </div>
+    </div >
   );
 }
 

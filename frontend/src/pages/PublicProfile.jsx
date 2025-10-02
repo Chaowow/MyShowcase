@@ -2,67 +2,69 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react'
 import * as Sentry from '@sentry/react';
-import toast from 'react-hot-toast';;
-import placeholder from '../assets/placeholder.jpg'
+import toast from 'react-hot-toast';
+import placeholder from '../assets/placeholder.jpg';
 
 
 function PublicProfile() {
   const { username } = useParams();
   const { user, isAuthenticated } = useAuth0();
   const [profile, setProfile] = useState(null);
-  const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasLiked, setHasLiked] = useState(false);
   const [pinnedLists, setPinnedLists] = useState([]);
   const [otherLists, setOtherLists] = useState([]);
   const [expandedListIds, setExpandedListIds] = useState([]);
   const [viewIncremented, setViewsIncremented] = useState(false);
+  const [loadingLists, setLoadingLists] = useState(true);
 
   const fetchUserData = async (username) => {
-  const res = await fetch(`http://localhost:5000/users/username/${username}`);
-  if (!res.ok) throw new Error('User not found');
-  return res.json();
-};
+    const res = await fetch(`http://localhost:5000/users/username/${username}`);
+    if (!res.ok) throw new Error('User not found');
+    return res.json();
+  };
 
   const fetchPinnedLists = async (auth0_id) => {
-  const res = await fetch(`http://localhost:5000/lists/pinned/${auth0_id}`);
-  if (!res.ok) throw new Error('Failed to fetch pinned lists');
-  return res.json();
-};
+    const res = await fetch(`http://localhost:5000/lists/pinned/${auth0_id}`);
+    if (!res.ok) throw new Error('Failed to fetch pinned lists');
+    return res.json();
+  };
 
   const fetchLists = async (auth0_id) => {
-  const res = await fetch(`http://localhost:5000/lists/${auth0_id}`);
-  if (!res.ok) throw new Error('Failed to fetch lists');
-  return res.json();
-};
+    const res = await fetch(`http://localhost:5000/lists/${auth0_id}`);
+    if (!res.ok) throw new Error('Failed to fetch lists');
+    return res.json();
+  };
 
   const incrementProfileView = async (auth0_id) => {
-  const res = await fetch(`http://localhost:5000/users/${auth0_id}/views`, {
-    method: 'PATCH',
-  });
-  if (!res.ok) throw new Error('Failed to increment profile view count');
-};
+    const res = await fetch(`http://localhost:5000/users/${auth0_id}/views`, {
+      method: 'PATCH',
+    });
+    if (!res.ok) throw new Error('Failed to increment profile view count');
+  };
 
   const fetchLikeStatus = async (viewerId, profileId) => {
-  const res = await fetch(`http://localhost:5000/users/${viewerId}/likes/${profileId}`);
-  if (!res.ok) throw new Error('Failed to check like status');
-  return res.json();
-};
+    const res = await fetch(`http://localhost:5000/users/${viewerId}/likes/${profileId}`);
+    if (!res.ok) throw new Error('Failed to check like status');
+    return res.json();
+  };
 
 
   useEffect(() => {
     const fetchPublicProfile = async () => {
       try {
+        setLoading(true);
+        setLoadingLists(true);
+
         const userData = await fetchUserData(username);
         setProfile(userData);
 
         const pinned = await fetchPinnedLists(userData.auth0_id);
         setPinnedLists(pinned)
 
-        const lists = await fetchLists(userData.auth0_id);
-        setLists(lists);
+        const allLists = await fetchLists(userData.auth0_id);
 
-        const remaining = lists.filter(
+        const remaining = allLists.filter(
           (list) => !pinned.some((p) => p.id === list.id)
         );
         setOtherLists(remaining);
@@ -81,6 +83,7 @@ function PublicProfile() {
         Sentry.captureException(err);
       } finally {
         setLoading(false);
+        setLoadingLists(false);
       }
     };
 
@@ -119,8 +122,8 @@ function PublicProfile() {
     }
   };
 
-   const toggleDescription = (id) => {
-    setExpandedListIds((prev) => 
+  const toggleDescription = (id) => {
+    setExpandedListIds((prev) =>
       prev.includes(id) ? prev.filter((listId) => listId !== id) : [...prev, id]
     );
   };
@@ -149,57 +152,76 @@ function PublicProfile() {
         <button
           onClick={handleLike}
           className={`mt-4 px-4 py-2 ${hasLiked ? 'bg-gray-500 hover:bg-gray-600'
-            : 'bg-pink-300 hover:bg-pink-400'} text-white rounded-md transition}`}
+            : 'bg-pink-300 hover:bg-pink-400'} text-white rounded-md transition`}
         >
           {hasLiked ? '💔 Unlike' : '❤️ Like'}
         </button>
       )}
 
-      {pinnedLists.length > 0 && (
-        <div className='mt-6'>
-          <h3 className='text-xl font-semibold mb-2 text-yellow-300'>⭐ Pinned Lists</h3>
-          {lists.length === 0 ? (
-            <p className='text-slate-400'>This user hasn't shared any lists yet.</p>
-          ) : (
-            <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-              {pinnedLists.map((list) => (
-                <li key={list.id} className='bg-indigo-900 p-4 rounded shadow'>
-                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+      <div className='mt-8'>
+        <h3 className='text-xl font-semibold mb-2 text-slate-200'>📌 Pinned Lists</h3>
 
-                  <div className='space-y-4'>
-                    {list.items[0] && (
-                      <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
-                        <img
-                          src={list.items[0].image || placeholder}
-                          alt={list.items[0].title}
-                          className='w-24 h-32 object-contain rounded'
-                        />
-                        <div className='flex flex-col justify-center'>
-                          <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
-                          <p className='text-sm text-slate-400'>#1 Pick</p>
-                        </div>
+        {loadingLists ? (
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px]">
+            {[...Array(3)].map((_, i) => (
+              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse h-[220px]" />
+            ))}
+          </ul>
+
+        ) : pinnedLists.length > 0 ? (
+          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px]'>
+            {pinnedLists.map((list) => (
+              <li key={list.id} className='bg-indigo-900 p-4 rounded shadow min-w-0'>
+                <h4 className='flex-1 min-w-0 text-xl font-bold mb-2 text-white line-clamp-2 
+                break-words [hyphens:auto]'>
+                  {list.title}
+                </h4>
+
+                <div className='space-y-4'>
+                  {list.items[0] && (
+                    <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
+                      <img
+                        src={list.items[0].image || placeholder}
+                        alt={list.items[0].title}
+                        className='w-24 h-32 object-contain rounded'
+                        width='96'
+                        height='128'
+                        fetchPriority='high'
+                        decoding='async'
+                      />
+                      <div className='flex flex-col justify-center'>
+                        <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
+                        <p className='text-sm text-slate-300'>#1 Pick</p>
                       </div>
-                    )}
-
-                    <div className='grid grid-cols-2 gap-4'>
-                      {list.items.slice(1).map((item, index) => (
-                        <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
-                          <img
-                            src={item.image || placeholder}
-                            alt={item.title}
-                            className='w-full h-32 object-contain rounded mb-2'
-                          />
-                          <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
-                        </div>
-                      ))}
                     </div>
-                  </div>
+                  )}
 
-                  {list.description && (
+                  <div className='grid grid-cols-2 gap-4'>
+                    {list.items.slice(1).map((item, index) => (
+                      <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
+                        <img
+                          src={item.image || placeholder}
+                          alt={item.title}
+                          className='w-full h-32 object-contain rounded mb-2'
+                          width='320'
+                          height='128'
+                          loading='lazy'
+                          decoding='async'
+                        />
+                        <p className='text-white font-semibold text-sm text-center line-clamp-2 
+                        break-words [hyphens:auto]'>
+                          {item.title}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {list.description && (
                   <>
                     <button
                       onClick={() => toggleDescription(list.id)}
-                      className='text-sm mt-2 text-indigo-300 hover:underline'
+                      className='text-sm mt-2 text-indigo-200 hover:underline'
                     >
                       {expandedListIds.includes(list.id) ? 'Hide Description' : 'Show Description'}
                     </button>
@@ -210,66 +232,93 @@ function PublicProfile() {
                   </>
                 )}
 
-                  <p className='text-sm text-slate-400 mt-4'>
-                    Created on {new Date(list.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+                <p className='text-sm text-slate-300 mt-4'>
+                  Created on {new Date(list.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className='min-h-[260px] bg-indigo-900/40 rounded-lg grid place-items-center'>
+            <p className='text-slate-300'>No pinned lists yet.</p>
+          </div>
+        )}
+      </div>
 
-      {otherLists.length > 0 && (
-        <div className='mt-8'>
-          <h3 className='text-xl font-semibold mb-2'>Lists</h3>
+      <div className='mt-8'>
+        <h3 className='text-xl font-semibold mb-2'>Lists</h3>
 
-          {otherLists.length == 0 ? (
-            <p className='text-slate-400'>The user has not created any other list</p>
-          ) : (
-            <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {otherLists.map((list) => (
-                <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow'>
-                  <h4 className='text-xl font-bold mb-2 text-white'>{list.title}</h4>
+        {loadingLists ? (
+          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[600px]'>
+            {[...Array(6)].map((_, i) => (
+              <li key={i} className='bg-indigo-900 p-4 rounded-lg shadow animate-pulse h-[220px]' />
+            ))}
+          </ul>
+        ) : otherLists.length === 0 ? (
+          <div className='min-h-[600px] bg-indigo-900/40 rounded-lg grid place-items-center text-center p-6'>
+            <div>
+              <p className='text-slate-300 mb-2'>This user hasn't created any lists yet.</p>
+              <p className='text-slate-300 text-sm'>Check back later!</p>
+            </div>
+          </div>
+        ) : (
+          <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[600px]'>
+            {otherLists.map((list) => (
+              <li key={list.id} className='bg-indigo-900 p-4 rounded-lg shadow min-w-0'>
+                <h4 className='flex-1 min-w-0 text-xl font-bold mb-2 text-white line-clamp-2 break-words [hyphens:auto]'>
+                  {list.title}
+                </h4>
 
-                  <div className='space-y-4'>
-                    {list.items[0] && (
-                      <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
-                        <img
-                          src={list.items[0].image || placeholder}
-                          alt={list.items[0].title}
-                          className='w-24 h-32 object-contain rounded'
-                        />
-                        <div className='flex flex-col justify-center'>
-                          <p className='text-white font-bold text-lg'>{list.items[0].title}</p>
-                          <p className='text-sm text-slate-400'>#1 Pick</p>
-                        </div>
+                <div className='space-y-4'>
+                  {list.items[0] && (
+                    <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
+                      <img
+                        src={list.items[0].image || placeholder}
+                        alt={list.items[0].title}
+                        className='w-24 h-32 object-contain rounded'
+                        width="96"
+                        height="128"
+                        fetchPriority='high'
+                        decoding="async"
+                      />
+                      <div className='flex flex-col justify-center'>
+                        <p className='text-white font-bold text-lg line-clamp-2 break-words [hyphens:auto]'>
+                          {list.items[0].title}
+                        </p>
+                        <p className='text-sm text-slate-300'>#1 Pick</p>
                       </div>
-                    )}
-
-                    <div className='grid grid-cols-2 gap-4'>
-                      {list.items.slice(1).map((item, index) => (
-                        <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
-                          <img
-                            src={item.image || placeholder}
-                            alt={item.title}
-                            className='w-full h-32 object-contain rounded mb-2'
-                          />
-                          <p className='text-white font-semibold text-sm text-center'>{item.title}</p>
-                        </div>
-                      ))}
                     </div>
-                  </div>
+                  )}
 
-                  {list.description && (
+                  <div className='grid grid-cols-2 gap-4'>
+                    {list.items.slice(1).map((item, index) => (
+                      <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow min-w-0'>
+                        <img
+                          src={item.image || placeholder}
+                          alt={item.title}
+                          className='w-full h-32 object-contain rounded mb-2'
+                          width="320"
+                          height="128"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <p className='text-white font-semibold text-sm text-center line-clamp-2 break-words [hyphens:auto]'>
+                          {item.title}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {list.description && (
                   <>
                     <button
                       onClick={() => toggleDescription(list.id)}
-                      className='text-sm mt-2 text-indigo-300 hover:underline'
+                      className='text-sm mt-2 text-indigo-200 hover:underline'
                     >
                       {expandedListIds.includes(list.id) ? 'Hide Description' : 'Show Description'}
                     </button>
@@ -280,19 +329,18 @@ function PublicProfile() {
                   </>
                 )}
 
-                  <p className='text-sm text-slate-400 mt-4'>
-                    Created on {new Date(list.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+                <p className='text-sm text-slate-300 mt-4'>
+                  Created on {new Date(list.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
