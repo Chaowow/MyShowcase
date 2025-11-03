@@ -145,9 +145,14 @@ function PublicProfile() {
           <h2 className='text-3xl font-bold mb-2'>{profile.username}</h2>
 
           <img
-            src={profile.pfp || placeholder}
-            alt={`${profile.username}'s profile`}
-            className='w-20 h-20 rounded-full mt-4 object-cover border-2 border-white shadow'
+            src={profile?.pfp || user.picture || placeholder}
+            alt={`${(profile.username || user?.name || 'User')}'s profile`}
+            width='80'
+            height='80'
+            loading='eager'
+            fetchPriority='high'
+            decoding='async'
+            className='w-20 h-20 rounded-full mt-4 border-2 border-white shadow'
           />
 
           <p className='text-slate-300 mt-2 mb-2'>
@@ -223,7 +228,7 @@ function PublicProfile() {
                         className='w-24 h-32 object-contain rounded'
                         width='96'
                         height='128'
-                        fetchPriority='high'
+                        loading='lazy'
                         decoding='async'
                       />
                       <div className='flex flex-col justify-center'>
@@ -292,7 +297,7 @@ function PublicProfile() {
         {loadingLists ? (
           <ul className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[600px]'>
             {[...Array(6)].map((_, i) => (
-               <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse min-w-0" >
+              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse min-w-0" >
 
                 <div className='h-10 w-4/5 bg-indigo-800 rounded mb-2' />
 

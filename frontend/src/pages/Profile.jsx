@@ -204,110 +204,127 @@ function Profile() {
       .catch(() => toast.error('Failed to copy link'));
   };
 
-  if (isLoading) return <p>Loading...</p>
-  if (!isAuthenticated) return <p>Please log in to view your profile.</p>
-  if (!profile) return <p>Loading your profile...</p>;
+  const headerLoading = isLoading || (isAuthenticated && !profile);
 
   return (
     <div className='bg-indigo-950 p-6 text-white'>
-
       {usernameError && <p className='text-red-400 text-sm mb-4'>{usernameError}</p>}
-      <div className='flex items-center gap-4 mb-2'>
-        {isEditing ? (
-          <>
-            <input
-              type='text'
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-              maxLength={20}
-              className='text-black px-2 py-1 rounded'
-            />
-            <button
-              onClick={() => setIsEditing(false)}
-              className='bg-gray-500 text-white px-2 py-1 rounded'
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSaveUsername}
-              className='bg-green-600 text-white px-2 py-1 rounded'
-            >
-              Save
-            </button>
-          </>
-        ) : (
-          <>
-            <h2 className='text-3xl font-bold'>{profile?.username || user.name}</h2>
-            {user.sub === profile?.auth0_id && (
-              <button
-                onClick={() => {
-                  setIsEditing(true);
-                  setNewUsername(profile?.username || '');
-                }}
-                className='bg-indigo-600 hover:bg-indigo-700 px-2 py-1 mt-2 rounded text-sm'
-              >
-                Edit
-              </button>
+
+      {headerLoading ? (
+  <div className="animate-pulse">
+    <div className="h-10 w-48 bg-indigo-900 rounded mb-2" />             {/* username (text-3xl ≈ h-10) */}
+    <div className="w-20 h-20 mt-4 rounded-full bg-indigo-900 border-2 border-white shadow" /> {/* avatar with SAME mt-4 */}
+    <div className="h-4 w-64 bg-indigo-900 rounded mt-2 mb-2" />         {/* joined */}
+    <div className="h-5 w-40 bg-indigo-900 rounded" />                   {/* views/likes */}
+    <div className="h-9 w-32 bg-indigo-900 rounded mt-4" />              {/* share btn (match real px-4 py-2) */}
+  </div>
+      ) : (
+        <>
+          <div className='flex items-center gap-4 mb-2'>
+            {isEditing ? (
+              <>
+                <input
+                  type='text'
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  maxLength={20}
+                  className='text-black px-2 py-1 rounded'
+                />
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className='bg-gray-500 text-white px-2 py-1 rounded'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveUsername}
+                  className='bg-green-600 text-white px-2 py-1 rounded'
+                >
+                  Save
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className='text-3xl font-bold'>{profile?.username || user.name}</h2>
+                <div className='h-7'>
+                  {user.sub === profile?.auth0_id && (
+                    <button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setNewUsername(profile?.username || '');
+                      }}
+                      className='bg-indigo-600 hover:bg-indigo-700 px-2 py-1 mt-2 rounded text-sm'
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
+              </>
             )}
-          </>
-        )}
-      </div>
-
-      <img
-        src={profile?.pfp || user.picture || placeholder}
-        alt={`${profile.username}'s profile`}
-        onClick={() => setIsSelectingAvatar(!isSelectingAvatar)}
-        className='w-20 h-20 rounded-full mt-4 border-2 border-white shadow cursor-pointer hover:opacity-80 transition'
-      />
-
-      {isSelectingAvatar && (
-        <div className='mt-4'>
-          <h4 className='text-lg font-semibold mb-2'>Choose Your Avatar</h4>
-          <div className='grid grid-cols-3 sm:grid-cols-4 gap-4'>
-            {avatars.map((avatar, idx) => (
-              <img
-                key={idx}
-                src={avatar.src}
-                alt={avatar.alt}
-                onClick={() => setNewPfp(avatar.src)}
-                className={`w-16 h-16 rounded-full cursor-pointer border-4 transition ${newPfp === avatar.src ? 'border-green-300' : 'border-transparent'
-                  }`}
-              />
-            ))}
           </div>
 
-          <div className='mt-3 flex gap-2'>
-            <button
-              onClick={handleSavePfp}
-              className='bg-green-600 text-white px-3 py-1 rounded'
-            >
-              Save Avatar
-            </button>
-            <button
-              onClick={() => setIsSelectingAvatar(false)}
-              className='bg-gray-500 text-white px-3 py-1 rounded'
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+          <img
+            src={profile?.pfp || user.picture || placeholder}
+            alt={`${(profile.username || user?.name || 'User')}'s profile`}
+            width='80'
+            height='80'
+            loading='eager'
+            fetchPriority='high'
+            decoding='async'
+            onClick={() => setIsSelectingAvatar(!isSelectingAvatar)}
+            className='w-20 h-20 rounded-full mt-4 border-2 border-white shadow cursor-pointer hover:opacity-80 transition'
+          />
+
+          {isSelectingAvatar && (
+            <div className='mt-4'>
+              <h4 className='text-lg font-semibold mb-2'>Choose Your Avatar</h4>
+              <div className='grid grid-cols-3 sm:grid-cols-4 gap-4'>
+                {avatars.map((avatar, idx) => (
+                  <img
+                    key={idx}
+                    src={avatar.src}
+                    alt={avatar.alt}
+                    onClick={() => setNewPfp(avatar.src)}
+                    className={`w-16 h-16 rounded-full cursor-pointer border-4 transition ${newPfp === avatar.src ? 'border-green-300' : 'border-transparent'
+                      }`}
+                  />
+                ))}
+              </div>
+
+              <div className='mt-3 flex gap-2'>
+                <button
+                  onClick={handleSavePfp}
+                  className='bg-green-600 text-white px-3 py-1 rounded'
+                >
+                  Save Avatar
+                </button>
+                <button
+                  onClick={() => setIsSelectingAvatar(false)}
+                  className='bg-gray-500 text-white px-3 py-1 rounded'
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <p className='text-slate-300 mt-2 mb-2'>
+            Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}
+          </p>
+
+          <p className='text-lg mt-2'>
+            <span className='text-indigo-300 font-semibold'>{profile?.views}</span> views ·
+            <span className='text-pink-300 font-semibold ml-2'>{profile?.likes}</span> likes
+          </p>
+
+          <button
+            onClick={handleShareProfile}
+            className='mt-4 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow'
+          >
+            Share Profile 🔗
+          </button>
+        </>
       )}
-
-      <p className='text-slate-300 mt-2 mb-2'>
-        Joined {profile?.created_at ? formatJoinDate(profile.created_at) : '...'}
-      </p>
-
-      <p className='text-lg mt-2'>
-        <span className='text-indigo-300 font-semibold'>{profile?.views}</span> views ·
-        <span className='text-pink-300 font-semibold ml-2'>{profile?.likes}</span> likes
-      </p>
-
-      <button
-        onClick={handleShareProfile}
-        className='mt-4 bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow'
-      >
-        Share Profile 🔗
-      </button>
 
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-2 text-slate-200">📌 Pinned Lists</h3>
@@ -315,7 +332,29 @@ function Profile() {
         {loadingLists ? (
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[260px]">
             {[...Array(3)].map((_, i) => (
-              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse h-[220px]" />
+              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse min-w-0" >
+
+                <div className='h-10 w-4/5 bg-indigo-800 rounded mb-2' />
+
+                <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg mb-4'>
+                  <div className='w-24 h-32 bg-indigo-700 rounded' />
+                  <div className='flex-1 space-y-2'>
+                    <div className='h-5 w-2/3 bg-indigo-700 rounded' />
+                    <div className='h-4 w-1/3 bg-indigo-700 rounded' />
+                  </div>
+                </div>
+
+                <div className='grid grid-cols-2 gap-4'>
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} className='bg-indigo-800 p-3 rounded-lg'>
+                      <div className='w-full h-32 bg-indigo-700 rounded mb-2' />
+                      <div className='h-4 w-4/5 mx-auto bg-indigo-700 rounded' />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="h-4 w-1/2 bg-indigo-800 rounded mt-4" />
+              </li>
             ))}
           </ul>
 
@@ -347,7 +386,7 @@ function Profile() {
                         className='w-24 h-32 object-contain rounded'
                         width='96'
                         height='128'
-                        fetchPriority='high'
+                        loading='lazy'
                         decoding='async'
                       />
                       <div className='flex flex-col justify-center'>
@@ -415,10 +454,32 @@ function Profile() {
         {loadingLists ? (
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[600px]">
             {[...Array(6)].map((_, i) => (
-              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse h-[220px]" />
+              <li key={i} className="bg-indigo-900 p-4 rounded-lg shadow animate-pulse min-w-0" >
+
+                <div className='h-10 w-4/5 bg-indigo-800 rounded mb-2' />
+
+                <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg mb-4'>
+                  <div className='w-24 h-32 bg-indigo-700 rounded' />
+                  <div className='flex-1 space-y-2'>
+                    <div className='h-5 w-2/3 bg-indigo-700 rounded' />
+                    <div className='h-4 w-1/3 bg-indigo-700 rounded' />
+                  </div>
+                </div>
+
+                <div className='grid grid-cols-2 gap-4'>
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} className='bg-indigo-800 p-3 rounded-lg'>
+                      <div className='w-full h-32 bg-indigo-700 rounded mb-2' />
+                      <div className='h-4 w-4/5 mx-auto bg-indigo-700 rounded' />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="h-4 w-1/2 bg-indigo-800 rounded mt-4" />
+              </li>
             ))}
           </ul>
-        ) : otherLists.length == 0 ? (
+        ) : otherLists.length === 0 ? (
           <div className='min-h-[600px] bg-indigo-900/40 rounded-lg grid place-items-center text-center p-6'>
             <div>
               <p className='text-slate-300 mb-2'>You haven't created any lists yet.</p>
