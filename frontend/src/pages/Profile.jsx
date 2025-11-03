@@ -3,10 +3,10 @@ import { useAuth0 } from '@auth0/auth0-react';
 import * as Sentry from '@sentry/react';
 import toast from 'react-hot-toast';
 import placeholder from '../assets/placeholder.jpg'
-import monkey from '../assets/Monkey.png';
-import cat from '../assets/Cat.png';
-import dog from '../assets/Dog.png';
-import owl from '../assets/Owl.png';
+import monkey from '../assets/Monkey.webp';
+import cat from '../assets/Cat.webp';
+import dog from '../assets/Dog.webp';
+import owl from '../assets/Owl.webp';
 
 
 function Profile() {
@@ -347,7 +347,7 @@ function Profile() {
                         className='w-24 h-32 object-contain rounded'
                         width='96'
                         height='128'
-                        loading='lazy'
+                        fetchPriority='high'
                         decoding='async'
                       />
                       <div className='flex flex-col justify-center'>

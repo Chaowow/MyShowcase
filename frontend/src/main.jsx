@@ -27,11 +27,14 @@ if (import.meta.env.PROD) {
       environment: import.meta.env.VITE_ENV || 'production',
       release: import.meta.env.VITE_COMMIT_SHA,
 
-      integrations: [Sentry.browserTracingIntegration()],
+      integrations: [
+        Sentry.browserTracingIntegration(),
+        Sentry.replayIntegration(),
+      ],
       tracesSampleRate: 0.05,
-      tracePropagationTargets: [/^https?:\/\/localhost(:\d+)?\/api/, /^https:\/\/your-prod-domain\.com\/api/],
+      tracePropagationTargets: [/^https?:\/\/localhost(:\d+)?\/api/],
 
-      replaysSessionSampleRate: 0.0,
+      replaysSessionSampleRate: 0.1,
       replaysOnErrorSampleRate: 1.0,
   
 

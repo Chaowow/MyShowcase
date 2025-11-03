@@ -4,9 +4,9 @@ import { FaGithub, FaLinkedin } from 'react-icons/fa6';
 
 function Footer() {
     return (
-        <footer role='contenttinfo' className='bg-indigo-950 text-slate-300 py-8 shrink-0'>
+        <footer role='contentinfo' className='bg-indigo-950 text-slate-300 py-8 shrink-0 min-h-24'>
             <div className='container mx-auto flex flex-col sm:flex-row items-center
-        space-y-4 sm:space-y-0 sm:justify-between'>
+            space-y-4 sm:space-y-0 sm:justify-between'>
 
                 <div className='flex space-x-4'>
                     <Link to='/about' className='hover:text-white'>About</Link>
