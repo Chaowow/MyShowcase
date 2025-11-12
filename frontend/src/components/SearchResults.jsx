@@ -1,6 +1,7 @@
 import React from 'react';
 import MediaCard from './MediaCard';
 import placeholder from '../assets/placeholder.jpg'
+import { proxied } from '../utils/img';
 
 
 function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, setCurrentPage, selectedCategory, isLoading }) {
@@ -66,7 +67,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                   return (
                     <MediaCard
                       key={item.id}
-                      imageSrc={item.volumeInfo.imageLinks?.thumbnail ? item.volumeInfo.imageLinks.thumbnail : placeholder}
+                      imageSrc={proxied(item.volumeInfo.imageLinks?.thumbnail ? item.volumeInfo.imageLinks.thumbnail : placeholder)}
                       alt={item.volumeInfo.title}
                       title={item.volumeInfo.title}
                       subtitle={item.volumeInfo.authors
@@ -96,7 +97,7 @@ function SearchResults({ searchResults, onOpenModal, currentPage, totalPages, se
                   return (
                     <MediaCard
                       key={item.id}
-                      imageSrc={item.background_image ? item.background_image : placeholder}
+                      imageSrc={proxied(item.background_image ? item.background_image : placeholder)}
                       alt={item.name}
                       title={item.name}
                       subtitle={item.released ? new Date(item.released).getFullYear() : 'Year not available'}

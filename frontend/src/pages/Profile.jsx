@@ -211,13 +211,13 @@ function Profile() {
       {usernameError && <p className='text-red-400 text-sm mb-4'>{usernameError}</p>}
 
       {headerLoading ? (
-  <div className="animate-pulse">
-    <div className="h-10 w-48 bg-indigo-900 rounded mb-2" />             {/* username (text-3xl ≈ h-10) */}
-    <div className="w-20 h-20 mt-4 rounded-full bg-indigo-900 border-2 border-white shadow" /> {/* avatar with SAME mt-4 */}
-    <div className="h-4 w-64 bg-indigo-900 rounded mt-2 mb-2" />         {/* joined */}
-    <div className="h-5 w-40 bg-indigo-900 rounded" />                   {/* views/likes */}
-    <div className="h-9 w-32 bg-indigo-900 rounded mt-4" />              {/* share btn (match real px-4 py-2) */}
-  </div>
+        <div className="animate-pulse">
+          <div className="h-10 w-48 bg-indigo-900 rounded mb-2" />
+          <div className="w-20 h-20 mt-4 rounded-full bg-indigo-900 border-2 border-white shadow" />
+          <div className="h-4 w-64 bg-indigo-900 rounded mt-2 mb-2" />
+          <div className="h-5 w-40 bg-indigo-900 rounded" />
+          <div className="h-9 w-32 bg-indigo-900 rounded mt-4" />
+        </div>
       ) : (
         <>
           <div className='flex items-center gap-4 mb-2'>

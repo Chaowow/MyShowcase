@@ -1,6 +1,6 @@
-const express = require('express'); 
-const dotenv = require('dotenv'); 
-const axios = require('axios'); 
+const express = require('express');
+const dotenv = require('dotenv');
+const axios = require('axios');
 const pool = require('./db');
 const { toHttps, normalizeGoogleBook } = require('./utils/toHttps');
 const cors = require('cors'); // Import CORS for cross-origin requests
@@ -9,11 +9,39 @@ const apiCaller = require('./utils/apiCaller'); // Custom utility for API calls
 const usersRoutes = require('./routes/users');
 const listsRoutes = require('./routes/lists');
 
+const ALLOWED_IMAGE_HOSTS = new Set([
+    'books.googleusercontent.com',
+    'books.google.com',
+    'media.rawg.io',
+    'image.tmdb.org'
+]);
+
+const IMAGE_TIMEOUT_MS = 7000;
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+const FORWARD_HEADERS = [
+    'content-type',
+    'cache-control',
+    'etag',
+    'last-modified',
+    'expires',
+];
+
+function isAllowedImageUrl(u) {
+    try {
+        const url = new URL(u);
+        if (!['http:', 'https:'].includes(url.protocol)) return false;
+        return ALLOWED_IMAGE_HOSTS.has(url.hostname);
+    } catch {
+        return false;
+    }
+}
+
+
 dotenv.config();
 
 
-const app = express(); 
-const PORT = process.env.PORT || 5000; 
+const app = express();
+const PORT = process.env.PORT || 5000;
 const cache = new NodeCache({ stdTTL: 300, checkperiod: 320 }); // Initialize cache with TTL of 300 seconds
 
 app.use(cors());
@@ -27,7 +55,7 @@ app.get('/', (req, res) => {
 
 // Cache middleware to reduce duplicate API calls
 const cacheMiddleware = (req, res, next) => {
-    const { query, page = 1, startIndex, type } = req.query;
+    const { query, page = 1, type } = req.query;
 
     // Generate a unique cache key based on the endpoint and query parameters
     let key;
@@ -57,7 +85,7 @@ const cacheMiddleware = (req, res, next) => {
 
 // Endpoint to fetch movies or TV shows from TMDb API
 app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
-    const { query, page = 1, type = 'movie' } = req.query; 
+    const { query, page = 1, type = 'movie' } = req.query;
     const TMDB_API_KEY = process.env.TMDB_API_KEY;
 
     if (!query) {
@@ -91,7 +119,7 @@ app.get('/api/tmdb', cacheMiddleware, async (req, res) => {
         res.json({
             results: currentItems,
             total_pages
-        }); 
+        });
     } catch (error) {
         res.status(500).json({ error: 'An error occurred while fetching data from TMDb.' });
     }
@@ -149,7 +177,7 @@ app.get('/api/rawg', cacheMiddleware, async (req, res) => {
 
     try {
         const data = await apiCaller('https://api.rawg.io/api/games', params); // Fetch data from RAWG API
-        
+
 
         // Format the results for consistency
         const formattedResults = (data.results || []).map((game) => ({
@@ -166,6 +194,81 @@ app.get('/api/rawg', cacheMiddleware, async (req, res) => {
     } catch (error) {
         console.error('RAWG API Error:', error.message);
         res.status(500).json({ error: 'An error occurred while fetching data from RAWG.' });
+    }
+});
+
+app.get('/api/image', async (req, res) => {
+    const raw = req.query.u;
+    if (!raw) return res.status(400).json({ error: 'Missing ?u' });
+
+    if (!isAllowedImageUrl(raw)) {
+        return res.status(400).json({ error: 'Host not allowed' });
+    }
+
+    try {
+
+        const upstream = await axios.get(raw, {
+            responseType: 'stream',
+            timeout: IMAGE_TIMEOUT_MS,
+            headers: {
+                'User-Agent': 'MyTopShowcase/1.0 (+https://example.local)',
+                'Accept': 'image/avif,image/webp,image/*;q=0.8,*/*;q=0.5'
+            },
+            withCredentials: false,
+            validateStatus: (s) => s >= 200 && s < 400,
+            maxRedirects: 3
+        });
+
+        const ct = upstream.headers['content-type'] || '';
+        if (!ct.startsWith('image/')) {
+            upstream.data.destroy();
+            return res.status(415).json({ error: 'Upstream is not an image' });
+        }
+
+        const lenHeader = upstream.headers['content-length'];
+        if (lenHeader && Number(lenHeader) > MAX_IMAGE_BYTES) {
+            upstream.data.destroy();
+            return res.status(413).json({ error: 'Image too large' });
+        }
+
+        FORWARD_HEADERS.forEach((h) => {
+            const v = upstream.headers[h];
+            if (v) res.setHeader(h, v);
+        });
+
+        if (!upstream.headers['cache-control']) {
+            res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+        }
+
+        if (lenHeader) {
+            res.setHeader('Content-Length', lenHeader);
+        }
+
+        let bytes = 0;
+        upstream.data.on('data', (chunk) => {
+            bytes += chunk.length;
+            if (bytes > MAX_IMAGE_BYTES) {
+                upstream.data.destroy(new Error('Image exceeded size cap'));
+            }
+        });
+
+        upstream.data.on('error', () => {
+            if (!res.headersSent) res.status(502);
+            res.end();
+        });
+
+        upstream.data.pipe(res);
+
+    } catch (err) {
+        if (axios.isAxiosError(err)) {
+            if (err.code === 'ECONNABORTED') {
+                return res.status(504).json({ error: 'Upstream timed out' });
+            }
+            const status = err.response?.status || 502;
+            return res.status(status).json({ error: 'Failed to fetch image' });
+        }
+
+        return res.status(500).json({ error: 'Proxy error' });
     }
 });
 
