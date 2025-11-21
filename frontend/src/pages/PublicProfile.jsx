@@ -135,11 +135,11 @@ function PublicProfile() {
 
       {loading ? (
         <div className="animate-pulse">
-          <div className="h-8 w-48 bg-indigo-900 rounded mb-4" />
-          <div className="w-20 h-20 rounded-full bg-indigo-900 border-2 border-white shadow" />
-          <div className="h-4 w-64 bg-indigo-900 rounded mt-3 mb-2" />
+          <div className="h-10 w-48 bg-indigo-900 rounded mb-2" />
+          <div className="w-20 h-20 mt-4 rounded-full bg-indigo-900 border-2 border-white shadow" />
+          <div className="h-4 w-64 bg-indigo-900 rounded mt-2 mb-2" />
           <div className="h-5 w-40 bg-indigo-900 rounded" />
-          <div className="h-9 w-28 bg-indigo-900 rounded mt-4" />
+          <div className="h-9 w-32 bg-indigo-900 rounded mt-4" />
         </div>
       ) : profile ? (
         <>
