@@ -10,6 +10,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import placeholder from '../assets/placeholder.jpg';
 import { useAuth0 } from '@auth0/auth0-react';
 import toast from 'react-hot-toast';
+import { proxied } from '../utils/img';
 
 function Create() {
     const { user, isAuthenticated } = useAuth0();
@@ -690,7 +691,7 @@ function Create() {
 
                                                                     <img
                                                                         loading='lazy'
-                                                                        src={item.image || placeholder}
+                                                                        src={proxied(item?.image)}
                                                                         alt={item.title}
                                                                         className='w-36 sm:w-48 md:w-64 lg:w-72 h-48 sm:h-64 md:h-80 
                                                                         lg:h-96 object-contain mb-3 rounded'

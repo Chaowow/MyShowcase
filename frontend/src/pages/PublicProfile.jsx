@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react'
 import * as Sentry from '@sentry/react';
 import toast from 'react-hot-toast';
 import placeholder from '../assets/placeholder.jpg';
+import { proxied } from '../utils/img';
 
 
 function PublicProfile() {
@@ -223,7 +224,7 @@ function PublicProfile() {
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
                       <img
-                        src={list.items[0].image || placeholder}
+                        src={proxied(list.items[0].image)}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
                         width='96'
@@ -242,7 +243,7 @@ function PublicProfile() {
                     {list.items.slice(1).map((item, index) => (
                       <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
                         <img
-                          src={item.image || placeholder}
+                          src={proxied(item?.image)}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
                           width='320'
@@ -341,7 +342,7 @@ function PublicProfile() {
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
                       <img
-                        src={list.items[0].image || placeholder}
+                        src={proxied(list.items[0].image)}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
                         width="96"
@@ -362,7 +363,7 @@ function PublicProfile() {
                     {list.items.slice(1).map((item, index) => (
                       <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow min-w-0'>
                         <img
-                          src={item.image || placeholder}
+                          src={proxied(item?.image)}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
                           width="320"

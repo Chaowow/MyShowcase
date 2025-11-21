@@ -7,6 +7,7 @@ import monkey from '../assets/Monkey.webp';
 import cat from '../assets/Cat.webp';
 import dog from '../assets/Dog.webp';
 import owl from '../assets/Owl.webp';
+import { proxied } from '../utils/img';
 
 
 function Profile() {
@@ -381,7 +382,7 @@ function Profile() {
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
                       <img
-                        src={list.items[0].image || placeholder}
+                        src={proxied(list.items[0].image)}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
                         width='96'
@@ -400,7 +401,7 @@ function Profile() {
                     {list.items.slice(1).map((item, index) => (
                       <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow'>
                         <img
-                          src={item.image || placeholder}
+                          src={proxied(item?.image)}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
                           width='320'
@@ -509,7 +510,7 @@ function Profile() {
                   {list.items[0] && (
                     <div className='flex gap-4 bg-indigo-800 p-4 rounded-lg shadow'>
                       <img
-                        src={list.items[0].image || placeholder}
+                        src={proxied(list.items[0].image)}
                         alt={list.items[0].title}
                         className='w-24 h-32 object-contain rounded'
                         width="96"
@@ -530,7 +531,7 @@ function Profile() {
                     {list.items.slice(1).map((item, index) => (
                       <div key={index} className='bg-indigo-800 p-3 rounded-lg shadow min-w-0'>
                         <img
-                          src={item.image || placeholder}
+                          src={proxied(item?.image)}
                           alt={item.title}
                           className='w-full h-32 object-contain rounded mb-2'
                           width="320"
