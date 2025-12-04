@@ -39,6 +39,7 @@ function Contact() {
 
       if (res.ok) {
         setSubmitted(true);
+        toast.success(`Message sent successfully! We'll get back to you as soon as possible.`);
         setEmail('');
         setDescription('');
         setErrors({});
@@ -75,15 +76,6 @@ function Contact() {
       </p>
 
       <hr className='border-t border-indigo-500 my-6 w-3/4 mx-auto' />
-
-      {submitted &&
-        <p
-          className='text-lg font-semibold text-green-400 bg-green-900/20 border-green-500 
-          py-3 px-6 rounded-md text-center mb-6'
-        >
-          Message sent successfully! We'll get back to you as soon as possible.
-        </p>
-      }
 
       <form
         onSubmit={handleSubmit}

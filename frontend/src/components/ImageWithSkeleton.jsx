@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-const ImageWithSkeleton = ({ 
-    src, 
-    alt, 
-    className, 
+const ImageWithSkeleton = ({
+    src,
+    alt,
+    className,
     skeletonClass,
     loading = 'lazy',
-    referrerPolicy='no-referrer' 
+    referrerPolicy = 'no-referrer'
 }) => {
     const [loaded, setLoaded] = useState(false);
 

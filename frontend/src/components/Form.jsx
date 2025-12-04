@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Form ({ open, onSave }) {
+function Form({ open, onSave }) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const maxCharCount = 52;
@@ -22,10 +22,10 @@ function Form ({ open, onSave }) {
     };
 
     return (
-            open ? (
+        open ? (
             <form onSubmit={handleSubmit} className='p-4 border rounded shadow-lg'>
                 <label className='block mb-2 text-white'>List Title</label>
-                <input 
+                <input
                     type='text'
                     value={title}
                     onChange={handleTitleChange}
@@ -35,7 +35,7 @@ function Form ({ open, onSave }) {
                 />
 
                 <label className='block mb-2 text-white'>Description</label>
-                <textarea 
+                <textarea
                     name='text'
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}

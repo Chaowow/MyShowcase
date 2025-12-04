@@ -9,9 +9,9 @@ import dog from '../assets/Dog.webp';
 import owl from '../assets/Owl.webp';
 import { proxied } from '../utils/img';
 
-
 function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth0();
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newUsername, setNewUsername] = useState('');
@@ -24,7 +24,7 @@ function Profile() {
   const [loadingLists, setLoadingLists] = useState(true);
 
   const createOrGetUser = async (user) => {
-    const res = await fetch('http://localhost:5000/users', {
+    const res = await fetch(`${API_BASE}/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -39,13 +39,13 @@ function Profile() {
   };
 
   const fetchUserLists = async (auth0_id) => {
-    const res = await fetch(`http://localhost:5000/lists/${auth0_id}`);
+    const res = await fetch(`${API_BASE}/lists/${auth0_id}`);
     if (!res.ok) throw new Error('Failed to fetch lists');
     return res.json();
   };
 
   const fetchPinnedLists = async (auth0_id) => {
-    const res = await fetch(`http://localhost:5000/lists/pinned/${auth0_id}`);
+    const res = await fetch(`${API_BASE}/lists/pinned/${auth0_id}`);
     if (!res.ok) throw new Error('Failed to fetch pinned lists');
     return res.json();
   };
@@ -79,7 +79,8 @@ function Profile() {
     if (isAuthenticated && user) {
       fetchProfileData();
     }
-  }, [isAuthenticated, user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]); 
 
   useEffect(() => {
     if (profile?.pfp) {
@@ -114,7 +115,7 @@ function Profile() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/users/${profile.auth0_id}/username`, {
+      const response = await fetch(`${API_BASE}/users/${profile.auth0_id}/username`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: newUsername })
@@ -141,7 +142,7 @@ function Profile() {
 
   const handleSavePfp = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/users/${profile.auth0_id}/pfp`, {
+      const res = await fetch(`${API_BASE}/users/${profile.auth0_id}/pfp`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pfp: newPfp })
@@ -162,7 +163,7 @@ function Profile() {
 
   const handleTogglePin = async (listId) => {
     try {
-      const res = await fetch(`http://localhost:5000/lists/pin`, {
+      const res = await fetch(`${API_BASE}/lists/pin`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -178,11 +179,11 @@ function Profile() {
         return;
       }
 
-      const pinnedRes = await fetch(`http://localhost:5000/lists/pinned/${profile.auth0_id}`);
+      const pinnedRes = await fetch(`${API_BASE}/lists/pinned/${profile.auth0_id}`);
       const pinned = await pinnedRes.json();
       setPinnedLists(pinned);
 
-      const allRes = await fetch(`http://localhost:5000/lists/${profile.auth0_id}`);
+      const allRes = await fetch(`${API_BASE}/lists/${profile.auth0_id}`);
       const all = await allRes.json();
       const rest = all.filter((list) => !pinned.some((p) => p.id === list.id));
       setOtherLists(rest);

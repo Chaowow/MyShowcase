@@ -12,8 +12,10 @@ import { useAuth0 } from '@auth0/auth0-react';
 import toast from 'react-hot-toast';
 import { proxied } from '../utils/img';
 
+
 function Create() {
     const { user, isAuthenticated } = useAuth0();
+    const API_BASE = import.meta.env.VITE_API_BASE_URL
     const [open, setOpen] = useState(false); // Controls whether the create list form is opem
     const [searchQuery, setSearchQuery] = useState(''); // Holds the current search query input
     const [searchResult, setSearchResults] = useState(null); // Stores the search results from API calls 
@@ -84,7 +86,7 @@ function Create() {
 
             const categoryConfig = {
                 movies: {
-                    url: 'http://localhost:5000/api/tmdb',
+                    url: `${API_BASE}/api/tmdb`,
                     params: { query, page: paginationKey, type: 'movie' },
                     processResponse: (data) => ({
                         results: data.results,
@@ -92,7 +94,7 @@ function Create() {
                     })
                 },
                 tvShows: {
-                    url: 'http://localhost:5000/api/tmdb',
+                    url: `${API_BASE}/api/tmdb`,
                     params: { query, page: paginationKey, type: 'tv' },
                     processResponse: (data) => ({
                         results: data.results,
@@ -100,7 +102,7 @@ function Create() {
                     })
                 },
                 books: {
-                    url: 'http://localhost:5000/api/books',
+                    url: `${API_BASE}/api/books`,
                     params: { query, page: paginationKey },
                     processResponse: (data) => ({
                         results: data.results,
@@ -108,7 +110,7 @@ function Create() {
                     })
                 },
                 videoGames: {
-                    url: 'http://localhost:5000/api/rawg',
+                    url: `${API_BASE}/api/rawg`,
                     params: { query, page: paginationKey },
                     processResponse: (data) => {
                         return {
@@ -147,7 +149,7 @@ function Create() {
             }
         },
 
-        [selectedCategory, cachedResults]
+        [selectedCategory, cachedResults, API_BASE]
     );
 
     // Fetch results when the debounced search query changes
@@ -170,7 +172,7 @@ function Create() {
         const fetchUserLists = async () => {
             if (isAuthenticated && user) {
                 try {
-                    const res = await fetch(`http://localhost:5000/lists/${user.sub}`);
+                    const res = await fetch(`${API_BASE}/lists/${user.sub}`);
                     const data = await res.json();
                     setUserList(data);
                 } catch (err) {
@@ -186,7 +188,7 @@ function Create() {
         };
 
         fetchUserLists();
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, API_BASE]);
 
     useEffect(() => {
         const migrateGuestLists = async () => {
@@ -198,7 +200,7 @@ function Create() {
 
                 try {
                     for (const list of guestLists) {
-                        const response = await fetch('http://localhost:5000/lists', {
+                        const response = await fetch(`${API_BASE}/lists`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -217,7 +219,7 @@ function Create() {
 
                     localStorage.removeItem('guestLists');
 
-                    const res = await fetch(`http://localhost:5000/lists/${user.sub}`);
+                    const res = await fetch(`${API_BASE}/lists/${user.sub}`);
                     const userLists = await res.json();
                     setUserList(userLists);
 
@@ -230,7 +232,7 @@ function Create() {
         };
 
         migrateGuestLists();
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, API_BASE]);
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -288,7 +290,7 @@ function Create() {
 
         if (isAuthenticated && user) {
             try {
-                const response = await fetch('http://localhost:5000/lists', {
+                const response = await fetch(`${API_BASE}/lists`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newList)
@@ -365,7 +367,7 @@ function Create() {
 
     const updateListOnServer = async (list) => {
         try {
-            const response = await fetch(`http://localhost:5000/lists/${list.id}`, {
+            const response = await fetch(`${API_BASE}/lists/${list.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -569,7 +571,7 @@ function Create() {
                                                         setModalAction(() => async () => {
                                                             try {
                                                                 if (isAuthenticated && user) {
-                                                                    const res = await fetch(`http://localhost:5000/lists/${list.id}`, {
+                                                                    const res = await fetch(`${API_BASE}/lists/${list.id}`, {
                                                                         method: 'DELETE'
                                                                     });
 

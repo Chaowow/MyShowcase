@@ -6,10 +6,10 @@ import toast from 'react-hot-toast';
 import placeholder from '../assets/placeholder.jpg';
 import { proxied } from '../utils/img';
 
-
 function PublicProfile() {
   const { username } = useParams();
   const { user, isAuthenticated } = useAuth0();
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasLiked, setHasLiked] = useState(false);
@@ -20,32 +20,32 @@ function PublicProfile() {
   const [loadingLists, setLoadingLists] = useState(true);
 
   const fetchUserData = async (username) => {
-    const res = await fetch(`http://localhost:5000/users/username/${username}`);
+    const res = await fetch(`${API_BASE}/users/username/${username}`);
     if (!res.ok) throw new Error('User not found');
     return res.json();
   };
 
   const fetchPinnedLists = async (auth0_id) => {
-    const res = await fetch(`http://localhost:5000/lists/pinned/${auth0_id}`);
+    const res = await fetch(`${API_BASE}/lists/pinned/${auth0_id}`);
     if (!res.ok) throw new Error('Failed to fetch pinned lists');
     return res.json();
   };
 
   const fetchLists = async (auth0_id) => {
-    const res = await fetch(`http://localhost:5000/lists/${auth0_id}`);
+    const res = await fetch(`${API_BASE}/lists/${auth0_id}`);
     if (!res.ok) throw new Error('Failed to fetch lists');
     return res.json();
   };
 
   const incrementProfileView = async (auth0_id) => {
-    const res = await fetch(`http://localhost:5000/users/${auth0_id}/views`, {
+    const res = await fetch(`${API_BASE}/users/${auth0_id}/views`, {
       method: 'PATCH',
     });
     if (!res.ok) throw new Error('Failed to increment profile view count');
   };
 
   const fetchLikeStatus = async (viewerId, profileId) => {
-    const res = await fetch(`http://localhost:5000/users/${viewerId}/likes/${profileId}`);
+    const res = await fetch(`${API_BASE}/users/${viewerId}/likes/${profileId}`);
     if (!res.ok) throw new Error('Failed to check like status');
     return res.json();
   };
@@ -89,6 +89,7 @@ function PublicProfile() {
     };
 
     fetchPublicProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, user, viewIncremented]);
 
   const formatJoinDate = (timestamp) => {
@@ -104,7 +105,7 @@ function PublicProfile() {
     if (!user || !profile) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/users/${profile.auth0_id}/likes`, {
+      const res = await fetch(`${API_BASE}/users/${profile.auth0_id}/likes`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ liker_auth0_id: user.sub })
